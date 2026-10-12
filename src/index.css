@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Questionnaire design tokens */
+    --si-primary: #2150D8;
+    --si-primary-pressed: #163BA8;
+    --si-selected: #EAF1FF;
+    --si-page: #F7FAFF;
+    --si-card: #FFFFFF;
+    --si-text: #0F1B3D;
+    --si-muted: #5B6784;
+    --si-border: #D5DEF0;
+    --si-notice-text: #B45309;
+    --si-notice-bg: #FFF7E6;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #FFFFFF;
+    color: #102C46;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Focus visible accessibility */
+  :focus-visible {
+    outline: 2px solid #0866C6;
+    outline-offset: 2px;
+  }
+}
+
+/* Progress bar smooth animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.progress-smooth-bar {
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
+}
+
+@keyframes celebratePop {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-celebrate-card {
+  animation: celebratePop 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

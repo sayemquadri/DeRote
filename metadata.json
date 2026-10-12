@@ -1,0 +1,6 @@
+{
+  "name": "DeRote — Student Insight System",
+  "description": "A reflective insight experience for students in Classes 5–12 exploring preferences, choices, motivations, and future possibilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
