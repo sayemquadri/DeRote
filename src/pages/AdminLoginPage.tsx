@@ -95,7 +95,7 @@ export function AdminLoginPage({
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#062B50] tracking-tight">
-              Educator & HOD Portal
+              Admin
             </h1>
             <p className="text-xs sm:text-sm text-[#64778C] mt-2 leading-relaxed">
               Access cohort insights, class-level reflection themes, and student response records.
@@ -159,7 +159,7 @@ export function AdminLoginPage({
           {/* Operational Note */}
           <div className="mt-6 pt-4 border-t border-[#F0F5FA] flex items-center justify-center gap-2 text-[11px] text-[#64778C]">
             <Building2 className="w-3.5 h-3.5 text-[#0866C6]" />
-            <span>DeRote Academic Leadership &amp; Department Heads (HODs)</span>
+            <span>DeRote Admin</span>
           </div>
         </div>
       </main>

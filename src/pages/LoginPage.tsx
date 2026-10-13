@@ -295,7 +295,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                     value={mobileNumber}
                     onChange={handleMobileChange}
                     maxLength={10}
-                    placeholder="9876543210"
+                    placeholder="XXXXXXXXXX"
                     disabled={isLoading}
                     className="w-full min-h-[48px] pl-13 pr-3.5 rounded-xl border border-[#062B50]/15 focus:border-[#0866C6] focus:ring-2 focus:ring-[#0866C6]/20 outline-none text-sm sm:text-base text-[#102C46] tracking-wide"
                   />
