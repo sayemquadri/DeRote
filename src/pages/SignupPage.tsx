@@ -106,7 +106,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
     setIsLoading(true);
 
     try {
-      const result = await registerLocalStudent({
+      const result = registerLocalStudent({
         fullName: fullName.trim(),
         classGrade: selectedClass,
         schoolName: schoolName.trim(),
@@ -132,7 +132,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
     } catch {
       setFormAlert({
         type: 'error',
-        message: 'An error occurred while creating your account. Please check your network connection and try again.',
+        message: 'A local session error occurred. Please try again.',
       });
     } finally {
       setIsLoading(false);

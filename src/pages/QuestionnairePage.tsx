@@ -39,7 +39,6 @@ import {
 } from '../services/questionnaireService';
 import {
   getCurrentActiveStudent,
-  onLocalAuthChange,
 } from '../services/localAuth';
 
 interface QuestionnairePageProps {
@@ -72,25 +71,7 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
 
-  // Subscribe to auth state changes to restore genuine Firebase sessions across refreshes
-  useEffect(() => {
-    const unsub = onLocalAuthChange((current) => {
-      if (current) {
-        setStudent({
-          id: current.id,
-          fullName: current.fullName,
-          classGrade: current.classGrade,
-          schoolName: current.schoolName,
-          phone: current.phone,
-        });
-      } else {
-        setStudent(null);
-      }
-    });
-    return () => unsub();
-  }, []);
-
-  // Load session from Cloud Firestore when student is present
+  // Load session when student is present
   useEffect(() => {
     if (!student) return;
 
@@ -254,7 +235,6 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   const handleSubmit = async () => {
     if (!session) return;
     setIsSubmitting(true);
-    setValidationAlert(null);
     const result = await submitQuestionnaireResponses(session);
     setIsSubmitting(false);
     if (result.success) {
@@ -262,8 +242,6 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
       setShowCelebration(true);
       playCelebrationChime();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      setValidationAlert(result.error || 'Failed to submit responses to Firebase. Your answers are preserved—please check your connection and try again.');
     }
   };
 
