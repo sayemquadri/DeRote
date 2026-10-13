@@ -157,8 +157,8 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
               <p>Access to student records is strictly restricted to:</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="p-3 rounded-xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                  <strong className="text-[#062B50] block font-bold">1. Authorized DeRote Mentors & HODs</strong>
-                  <p className="text-[#64778C] text-xs mt-1">Designated academic staff and Department Heads who conduct review sessions or provide coaching guidance.</p>
+                  <strong className="text-[#062B50] block font-bold">1. Authorized DeRote Mentors &amp; Administrators</strong>
+                  <p className="text-[#64778C] text-xs mt-1">Designated academic staff and administrators who conduct review sessions or provide coaching guidance.</p>
                 </div>
                 <div className="p-3 rounded-xl bg-[#F8FAFD] border border-[#E8F3FF]">
                   <strong className="text-[#062B50] block font-bold">2. System Administrators</strong>
@@ -182,7 +182,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
                 <strong>Future Institutional Deployment:</strong> In a future phase, DeRote may partner with recognized school institutions. Under such future arrangements:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-[#334E68]">
-                <li>An authorized DeRote HOD or representative may print student insight reports and provide them to the school.</li>
+                <li>An authorized DeRote admin or representative may print student insight reports and provide them to the school.</li>
                 <li>Such sharing will only take place under formal institutional agreements and applicable student/guardian permissions.</li>
                 <li>Schools will not receive unmonitored digital access without prior notice and valid operational agreements.</li>
               </ul>

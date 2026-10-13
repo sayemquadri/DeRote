@@ -39,6 +39,7 @@ import {
 } from '../services/questionnaireService';
 import {
   getCurrentActiveStudent,
+  onLocalAuthChange,
 } from '../services/localAuth';
 
 interface QuestionnairePageProps {
@@ -71,7 +72,25 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
 
-  // Load session when student is present
+  // Subscribe to auth state changes to restore genuine Firebase sessions across refreshes
+  useEffect(() => {
+    const unsub = onLocalAuthChange((current) => {
+      if (current) {
+        setStudent({
+          id: current.id,
+          fullName: current.fullName,
+          classGrade: current.classGrade,
+          schoolName: current.schoolName,
+          phone: current.phone,
+        });
+      } else {
+        setStudent(null);
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // Load session from Cloud Firestore when student is present
   useEffect(() => {
     if (!student) return;
 
@@ -95,12 +114,20 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
     return session.answers[currentQuestion.id];
   }, [session, currentQuestion.id]);
 
+  const [cloudSyncState, setCloudSyncState] = useState<'saved' | 'saving' | 'offline_unsynced'>('saved');
+
   // Auto-save debouncer
   const saveDraft = async (updatedSession: QuestionnaireSession) => {
     setIsSaving(true);
-    await persistQuestionnaireDraft(updatedSession);
+    setCloudSyncState('saving');
+    const result = await persistQuestionnaireDraft(updatedSession);
     setIsSaving(false);
-    setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    if (result.confirmedCloudSaved) {
+      setCloudSyncState('saved');
+      setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    } else {
+      setCloudSyncState('offline_unsynced');
+    }
   };
 
   // Option selection handler
@@ -235,6 +262,7 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   const handleSubmit = async () => {
     if (!session) return;
     setIsSubmitting(true);
+    setValidationAlert(null);
     const result = await submitQuestionnaireResponses(session);
     setIsSubmitting(false);
     if (result.success) {
@@ -242,6 +270,8 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
       setShowCelebration(true);
       playCelebrationChime();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setValidationAlert(result.error || 'Failed to submit responses to Firebase. Your answers are preserved—please check your connection and try again.');
     }
   };
 
@@ -334,11 +364,11 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
-              onClick={() => onNavigate('/login')}
+              onClick={() => onNavigate('/dashboard')}
               className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2 py-1 -ml-2 cursor-pointer shrink-0"
             >
               <ArrowLeft className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Portal</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </button>
             <div className="h-4 w-px bg-[#E8F3FF] hidden sm:block" />
             <DeRoteWordmark size="sm" showDescriptor={false} />
@@ -347,9 +377,21 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
           {/* Student Status & Save Indicator */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <div className="hidden md:flex items-center gap-2 text-xs text-[#64778C] bg-[#F4F8FD] px-3 py-1.5 rounded-full border border-[#E8F3FF]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  cloudSyncState === 'saved'
+                    ? 'bg-emerald-500'
+                    : cloudSyncState === 'saving'
+                    ? 'bg-[#0866C6] animate-pulse'
+                    : 'bg-amber-500'
+                }`}
+              />
               <span>
-                {isSaving ? 'Saving...' : `Autosaved (${lastSavedTime})`}
+                {cloudSyncState === 'saving'
+                  ? 'Saving to Firebase...'
+                  : cloudSyncState === 'saved'
+                  ? `Saved to Firebase (${lastSavedTime})`
+                  : 'Saved on device (offline)'}
               </span>
             </div>
 

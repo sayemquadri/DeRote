@@ -24,7 +24,7 @@ export function AdminLoginPage({
   const [errorAlert, setErrorAlert] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorAlert(null);
 
@@ -34,16 +34,19 @@ export function AdminLoginPage({
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      const res = loginAdmin(email, password);
-      setIsLoading(false);
+    try {
+      const res = await loginAdmin(email, password);
       if (res.success) {
         if (onAdminLoginSuccess) onAdminLoginSuccess();
         onNavigate('/admin');
       } else {
         setErrorAlert(res.error || 'Authentication failed. Please verify credentials.');
       }
-    }, 150);
+    } catch {
+      setErrorAlert('A network or server error occurred during administrator authentication.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -152,7 +155,7 @@ export function AdminLoginPage({
               className="w-full mt-2 py-3 px-4 rounded-xl bg-[#062B50] text-white font-bold text-xs hover:bg-[#0866C6] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
             >
               <Shield className="w-4 h-4" />
-              <span>{isLoading ? 'Verifying...' : 'Sign In as Administrator'}</span>
+              <span>{isLoading ? 'Verifying...' : 'Sign In as Admin'}</span>
             </button>
           </form>
 

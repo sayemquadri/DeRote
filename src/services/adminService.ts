@@ -1,25 +1,39 @@
 /**
  * Admin Service for DeRote Student Insight System
  *
- * Manages Head of Department (HOD) and School Administrator access,
- * aggregate cohort analytics, and individual student response review.
+ * Connected directly to Firebase Authentication & Cloud Firestore:
+ * - Genuine Firebase Authentication for Institutional Administrators & Admins
+ * - Real-time querying of student records and sessions from Cloud Firestore
+ * - No fake rosters, no mock credentials, and no fabricated cohort statistics
  */
 
-import { getStoredAccounts, LocalStudentAccount } from './localAuth';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from 'firebase/auth';
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  query,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
+import { auth, db } from './firebase';
 import { QUESTION_BANK } from '../data/questionnaireBank';
 import { QuestionnaireSession } from './questionnaireService';
 import { generateStudentInsightReport, StudentInsightReport } from './insightEngine';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
 
 export interface AdminAccount {
-  id: string;
+  id: string; // Firebase UID
   fullName: string;
-  roleTitle: string; // e.g. "Head of Department (HOD)"
+  roleTitle: string; // e.g. "Admin"
   institution: string; // e.g. "Delhi Public School, R.K. Puram"
   email: string;
   avatarText?: string;
-  isDemo?: boolean;
 }
 
 export interface StudentAdminRecord {
@@ -52,36 +66,18 @@ export interface CohortAnalytics {
   topTeacherGuidanceWishes: { label: string; count: number; percentage: number }[];
 }
 
-const ADMIN_SESSION_KEY = 'derote_active_admin_session_v1';
-const LOCAL_DRAFT_KEY = 'derote_questionnaire_draft_v1';
-
-export const PRIMARY_ADMIN_UID = 'HRmNP5WPw5fXtihxIVB2nkcCTkz1';
+export const PRIMARY_ADMIN_UID = 'contact@derote.in';
 
 export const ADMIN_ACCOUNT: AdminAccount = {
   id: PRIMARY_ADMIN_UID,
-  fullName: 'Dr. Rajesh Kulkarni',
-  roleTitle: 'Head of Department & Academic Coordinator',
-  institution: 'Delhi Public School, R.K. Puram',
-  email: 'admin@derote.in',
+  fullName: 'DeRote Academic Leadership',
+  roleTitle: 'Admin',
+  institution: 'DeRote Partner School Network',
+  email: 'contact@derote.in',
   avatarText: 'AD',
-  isDemo: false,
 };
 
-export const DEMO_ADMIN_ACCOUNT = ADMIN_ACCOUNT;
-
-export function isSuperAdminId(idOrEmailOrPhone: string | null | undefined): boolean {
-  if (!idOrEmailOrPhone) return false;
-  const raw = idOrEmailOrPhone.trim();
-  const lower = raw.toLowerCase();
-  return (
-    raw === PRIMARY_ADMIN_UID ||
-    lower === PRIMARY_ADMIN_UID.toLowerCase() ||
-    lower === 'admin@derote.in' ||
-    lower === 'contact@derote.in' ||
-    lower === 'rajesh.kulkarni@derote.in'
-  );
-}
-
+const ADMIN_SESSION_KEY = 'derote_active_admin_session_v1';
 export const ADMIN_AUTH_STATE_EVENT = 'derote_admin_auth_changed';
 
 /**
@@ -150,164 +146,197 @@ export function getCurrentAdmin(): AdminAccount | null {
 }
 
 /**
- * Logs in admin using credentials
+ * Genuine Firebase Authentication: Logs in administrator using Firebase Authentication
  */
-export function loginAdmin(emailOrId: string, pass: string): { success: boolean; error?: string; admin?: AdminAccount } {
-  const clean = emailOrId.trim();
-  const lower = clean.toLowerCase();
+export async function loginAdmin(
+  email: string,
+  pass: string
+): Promise<{ success: boolean; error?: string; admin?: AdminAccount }> {
+  const cleanEmail = email.trim().toLowerCase();
 
-  // Primary Super Admin check by UID, official admin email, or contact email
-  if (
-    clean === PRIMARY_ADMIN_UID ||
-    lower === PRIMARY_ADMIN_UID.toLowerCase() ||
-    ((lower === 'admin@derote.in' || lower === 'rajesh.kulkarni@derote.in' || lower === 'contact@derote.in') && (pass === 'admin123' || pass.length >= 4))
-  ) {
-    setAdminSession(ADMIN_ACCOUNT);
-    return { success: true, admin: ADMIN_ACCOUNT };
-  }
-
-  // Institutional administrator accounts
-  if ((lower.includes('admin') || clean.length >= 20) && pass.length >= 4) {
-    const customAdmin: AdminAccount = {
-      id: clean.length >= 20 ? clean : `admin_${Date.now()}`,
-      fullName: 'School Administrator',
-      roleTitle: 'Institutional Coordinator',
-      institution: 'DeRote Partner School',
-      email: lower.includes('@') ? lower : `${clean}@admin.derote.in`,
-      avatarText: 'SA',
-      isDemo: false,
+  if (!cleanEmail || !pass) {
+    return {
+      success: false,
+      error: 'Please enter both administrator email and password.',
     };
-    setAdminSession(customAdmin);
-    return { success: true, admin: customAdmin };
   }
 
-  return {
-    success: false,
-    error: 'Invalid administrator email, User ID, or password. Please verify credentials with DeRote administration.',
-  };
-}
+  try {
+    // 1. Authenticate with Firebase Authentication
+    const credential = await signInWithEmailAndPassword(auth, cleanEmail, pass);
+    const user = credential.user;
 
-/**
- * Backward compatibility helper
- */
-export function loginAsDemoAdmin(): AdminAccount {
-  setAdminSession(ADMIN_ACCOUNT);
-  return ADMIN_ACCOUNT;
-}
+    // Check if user is recognized as an admin
+    let roleTitle = 'Admin';
+    let institution = 'DeRote Partner School Network';
+    let fullName = user.displayName || 'Administrator';
 
-/**
- * Sign out admin
- */
-export function signOutAdmin(): void {
-  setAdminSession(null);
-}
-
-/**
- * Gets all student records along with their sessions and reports
- */
-export function getAllStudentAdminRecords(): StudentAdminRecord[] {
-  const stored = getStoredAccounts();
-  const allAccounts: LocalStudentAccount[] = [...stored];
-
-  const records: StudentAdminRecord[] = [];
-
-  for (const account of allAccounts) {
-    let session: QuestionnaireSession | null = null;
-
-    // Check localStorage for student draft
+    // Check admin document in /admins/{uid} if present
     try {
-      const raw = localStorage.getItem(`${LOCAL_DRAFT_KEY}_${account.id}`);
-      if (raw) {
-        session = JSON.parse(raw);
+      const adminDoc = await getDoc(doc(db, 'admins', user.uid));
+      if (adminDoc.exists()) {
+        const data = adminDoc.data();
+        if (data.fullName) fullName = data.fullName;
+        if (data.roleTitle) roleTitle = data.roleTitle;
+        if (data.institution) institution = data.institution;
       }
     } catch {
-      // Ignore
+      // Proceed with defaults
     }
 
-    if (!session) {
-      session = {
-        sessionId: `session_${account.id}`,
-        studentId: account.id,
-        version: 'v1_classes_8_10',
-        status: 'draft',
-        currentQuestionIndex: 0,
-        answers: {},
-        createdAt: account.createdAt || new Date().toISOString(),
-        updatedAt: account.lastLoginAt || new Date().toISOString(),
+    const initials = fullName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'AD';
+
+    const account: AdminAccount = {
+      id: user.uid,
+      fullName,
+      roleTitle,
+      institution,
+      email: cleanEmail,
+      avatarText: initials,
+    };
+
+    setAdminSession(account);
+    return { success: true, admin: account };
+  } catch (err: unknown) {
+    const error = err as { code?: string; message?: string };
+    console.warn('Firebase Admin Authentication notice:', error.code || error.message);
+
+    if (
+      error.code === 'auth/invalid-credential' ||
+      error.code === 'auth/user-not-found' ||
+      error.code === 'auth/wrong-password'
+    ) {
+      return {
+        success: false,
+        error: 'Invalid administrator email or password. Please verify credentials.',
+      };
+    }
+    if (error.code === 'auth/too-many-requests') {
+      return {
+        success: false,
+        error: 'Too many failed login attempts. Access temporarily locked. Please try again later.',
       };
     }
 
-    const answers = session.answers || {};
-    const answeredCount = Object.values(answers).filter(
-      (a) => a.status === 'answered' && a.selectedOptions && a.selectedOptions.length > 0
-    ).length;
-
-    const isSubmitted = session.status === 'submitted' || answeredCount === QUESTION_BANK.length;
-
-    const insightReport = generateStudentInsightReport(
-      session,
-      account.fullName,
-      account.classGrade
-    );
-
-    records.push({
-      id: account.id,
-      fullName: account.fullName,
-      classGrade: account.classGrade,
-      schoolName: account.schoolName,
-      phone: account.phone,
-      isSubmitted,
-      answeredCount,
-      totalQuestions: QUESTION_BANK.length,
-      lastActive: session.updatedAt || session.createdAt || 'Recent',
-      session,
-      insightReport,
-    });
+    return {
+      success: false,
+      error: error.message || 'Administrator sign-in failed. Please verify credentials.',
+    };
   }
-
-  return records;
 }
 
 /**
- * Fetches all student records from Firestore (permitted for Admin UID HRmNP5WPw5fXtihxIVB2nkcCTkz1)
+ * Genuine Firebase Sign Out for Administrator
  */
-export async function fetchStudentAdminRecordsFromFirestore(): Promise<StudentAdminRecord[]> {
-  const localRecords = getAllStudentAdminRecords();
+export async function signOutAdmin(): Promise<void> {
+  try {
+    await signOut(auth);
+  } catch (err) {
+    console.warn('Sign out warning:', err);
+  } finally {
+    setAdminSession(null);
+  }
+}
+
+/**
+ * Restore genuine admin session on page refresh via Firebase Auth
+ */
+onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+  if (!firebaseUser) {
+    if (getCurrentAdmin()) {
+      setAdminSession(null);
+    }
+    return;
+  }
+
+  // If the user's email matches the primary admin email or has an admin document
+  if (firebaseUser.email === 'contact@derote.in') {
+    let fullName = firebaseUser.displayName || 'DeRote Academic Leadership';
+    let roleTitle = 'Admin';
+    let institution = 'DeRote Partner School Network';
+
+    try {
+      const adminDoc = await getDoc(doc(db, 'admins', firebaseUser.uid));
+      if (adminDoc.exists()) {
+        const d = adminDoc.data();
+        if (d.fullName) fullName = d.fullName;
+        if (d.roleTitle) roleTitle = d.roleTitle;
+        if (d.institution) institution = d.institution;
+      }
+    } catch {
+      // Keep defaults
+    }
+
+    const initials = fullName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'AD';
+
+    const account: AdminAccount = {
+      id: firebaseUser.uid,
+      fullName,
+      roleTitle,
+      institution,
+      email: firebaseUser.email,
+      avatarText: initials,
+    };
+
+    setAdminSession(account);
+  }
+});
+
+/**
+ * Loads all real student records from Cloud Firestore (/students)
+ * and their associated questionnaire submissions (/students/{id}/sessions).
+ */
+export async function fetchAllStudentAdminRecords(): Promise<StudentAdminRecord[]> {
   try {
     const studentsSnap = await getDocs(collection(db, 'students'));
-    const firestoreRecords: StudentAdminRecord[] = [];
+    if (studentsSnap.empty) {
+      return [];
+    }
+
+    const records: StudentAdminRecord[] = [];
 
     for (const studentDoc of studentsSnap.docs) {
-      const data = studentDoc.data();
+      const studentData = studentDoc.data();
       const studentId = studentDoc.id;
 
-      // Avoid duplicating accounts already present in local records
-      if (localRecords.some((r) => r.id === studentId)) {
-        continue;
-      }
-
+      // Query real sessions for this student from Firestore
       let session: QuestionnaireSession | null = null;
       try {
-        // Fetch session from Firestore subcollection
-        const sessionsSnap = await getDocs(collection(db, 'students', studentId, 'sessions'));
+        const sessionsSnap = await getDocs(
+          query(
+            collection(db, 'students', studentId, 'sessions'),
+            orderBy('updatedAt', 'desc'),
+            limit(1)
+          )
+        );
+
         if (!sessionsSnap.empty) {
-          const firstSess = sessionsSnap.docs[0].data();
-          session = firstSess as QuestionnaireSession;
+          session = sessionsSnap.docs[0].data() as QuestionnaireSession;
         }
-      } catch {
-        // Fallback if session fetch not present
+      } catch (sessionErr) {
+        console.warn(`Could not fetch sessions for student ${studentId}:`, sessionErr);
       }
 
       if (!session) {
         session = {
           sessionId: `session_${studentId}`,
-          studentId: studentId,
+          studentId,
           version: 'v1_classes_8_10',
           status: 'draft',
           currentQuestionIndex: 0,
           answers: {},
-          createdAt: data.createdAt || new Date().toISOString(),
-          updatedAt: data.lastLoginAt || new Date().toISOString(),
+          createdAt: studentData.createdAt || new Date().toISOString(),
+          updatedAt: studentData.lastLoginAt || new Date().toISOString(),
         };
       }
 
@@ -316,37 +345,38 @@ export async function fetchStudentAdminRecordsFromFirestore(): Promise<StudentAd
         (a) => a.status === 'answered' && a.selectedOptions && a.selectedOptions.length > 0
       ).length;
 
-      const isSubmitted = session.status === 'submitted' || answeredCount === QUESTION_BANK.length;
+      const isSubmitted = session.status === 'submitted';
+
       const insightReport = generateStudentInsightReport(
         session,
-        data.fullName || 'Student',
-        data.classGrade || '10'
+        studentData.fullName || 'Student',
+        studentData.classGrade || '—'
       );
 
-      firestoreRecords.push({
+      records.push({
         id: studentId,
-        fullName: data.fullName || 'Student',
-        classGrade: data.classGrade || 'Class 10',
-        schoolName: data.schoolName || 'School',
-        phone: data.phone || 'XXXXXXXXXX',
+        fullName: studentData.fullName || 'Unnamed Student',
+        classGrade: studentData.classGrade ? (studentData.classGrade.startsWith('Class') ? studentData.classGrade : `Class ${studentData.classGrade}`) : '—',
+        schoolName: studentData.schoolName || '—',
+        phone: studentData.phone || '—',
         isSubmitted,
         answeredCount,
         totalQuestions: QUESTION_BANK.length,
-        lastActive: session.updatedAt || session.createdAt || 'Recent',
+        lastActive: session.updatedAt || session.createdAt || studentData.lastLoginAt || 'Recent',
         session,
         insightReport,
       });
     }
 
-    return [...localRecords, ...firestoreRecords];
+    return records;
   } catch (err) {
-    console.warn('Firestore admin records fetch fallback to local:', err);
-    return localRecords;
+    console.error('Failed to fetch student admin records from Firestore:', err);
+    throw err;
   }
 }
 
 /**
- * Calculates aggregated cohort analytics
+ * Calculates aggregated cohort analytics based on genuine Firestore student records
  */
 export function calculateCohortAnalytics(records: StudentAdminRecord[]): CohortAnalytics {
   const totalStudents = records.length;

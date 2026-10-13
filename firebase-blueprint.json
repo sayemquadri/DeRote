@@ -59,7 +59,7 @@
           "maxLength": 50
         }
       },
-      "required": ["id", "fullName", "classGrade", "schoolName", "phone", "createdAt"]
+      "required": ["id", "fullName", "classGrade", "schoolName", "createdAt"]
     },
     "QuestionnaireSession": {
       "title": "QuestionnaireSession",

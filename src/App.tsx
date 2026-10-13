@@ -15,13 +15,11 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { ContactPrivacyPage } from './pages/ContactPrivacyPage';
 import { StudentConsentPage } from './pages/StudentConsentPage';
+import { StudentDashboardPage } from './pages/StudentDashboardPage';
 import {
   getCurrentAdmin,
   onAdminAuthChange,
   AdminAccount,
-  PRIMARY_ADMIN_UID,
-  ADMIN_ACCOUNT,
-  setAdminSession,
 } from './services/adminService';
 import {
   getCurrentActiveStudent,
@@ -38,6 +36,7 @@ export default function App() {
     const hash = window.location.hash;
     const matchRoute = (r: string) => path === r || hash === `#${r}` || hash === `#/${r.replace(/^\//, '')}`;
 
+    if (matchRoute('/dashboard')) return '/dashboard';
     if (matchRoute('/signup')) return '/signup';
     if (matchRoute('/login')) return '/login';
     if (matchRoute('/admin')) return '/admin';
@@ -68,11 +67,7 @@ export default function App() {
       setActiveStudent(student);
     });
     const unsubFirebase = onAuthStateChanged(auth, (user) => {
-      const uid = user?.uid || null;
-      setFirebaseUserUid(uid);
-      if (uid === PRIMARY_ADMIN_UID) {
-        setAdminSession(ADMIN_ACCOUNT);
-      }
+      setFirebaseUserUid(user?.uid || null);
     });
     return () => {
       unsubAdmin();
@@ -81,11 +76,10 @@ export default function App() {
     };
   }, []);
 
-  // Determine if active user is the super administrator
+  // Determine if active user is an authorized administrator
   const isSuperAdmin =
-    currentAdmin?.id === PRIMARY_ADMIN_UID ||
-    activeStudent?.id === PRIMARY_ADMIN_UID ||
-    firebaseUserUid === PRIMARY_ADMIN_UID;
+    currentAdmin?.email === 'contact@derote.in' ||
+    auth.currentUser?.email === 'contact@derote.in';
 
   useEffect(() => {
     const handlePopState = () => {
@@ -93,7 +87,9 @@ export default function App() {
       const hash = window.location.hash;
       const matchRoute = (r: string) => path === r || hash === `#${r}` || hash === `#/${r.replace(/^\//, '')}`;
 
-      if (matchRoute('/signup')) {
+      if (matchRoute('/dashboard')) {
+        setCurrentRoute('/dashboard');
+      } else if (matchRoute('/signup')) {
         setCurrentRoute('/signup');
       } else if (matchRoute('/login')) {
         setCurrentRoute('/login');
@@ -152,6 +148,13 @@ export default function App() {
       {currentRoute === '/signup' && (
         <main className="flex-1 flex flex-col">
           <SignupPage onNavigate={navigateTo} />
+        </main>
+      )}
+
+      {/* Route: Student Personal Dashboard */}
+      {currentRoute === '/dashboard' && (
+        <main className="flex-1 flex flex-col">
+          <StudentDashboardPage onNavigate={navigateTo} />
         </main>
       )}
 
@@ -229,7 +232,8 @@ export default function App() {
       )}
 
       {/* Route: Landing Page (Default & Fallback for root / other routes) */}
-      {currentRoute !== '/login' &&
+      {currentRoute !== '/dashboard' &&
+        currentRoute !== '/login' &&
         currentRoute !== '/signup' &&
         currentRoute !== '/prototype' &&
         currentRoute !== '/questionnaire' &&

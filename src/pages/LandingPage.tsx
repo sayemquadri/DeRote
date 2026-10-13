@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Compass, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Compass } from 'lucide-react';
 import { FlowingBlueRibbons } from '../components/FlowingBlueRibbons';
 import { Footer } from '../components/Footer';
 import step2Art from '../assets/images/22.png';
@@ -77,12 +77,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               >
                 Already have an account? Sign in
               </button>
-            </div>
-
-            {/* Reassurance Trust Signal */}
-            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-[#64778C]">
-              <ShieldCheck className="w-4 h-4 text-[#0866C6] shrink-0" />
-              <span>Reflective & non-evaluative · Designed for mobile access</span>
             </div>
           </div>
         </section>

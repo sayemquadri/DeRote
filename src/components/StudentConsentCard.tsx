@@ -66,7 +66,7 @@ const POLICY_ITEMS: PolicyAccordionItem[] = [
     summary:
       'Only designated DeRote mentors review reflections, and printed reports may be shared with schools in future phases under agreements.',
     details: [
-      'Only authorized DeRote mentors, academic counselors, HODs, and administrators can access student reflection reports to offer personalized guidance.',
+      'Only authorized DeRote mentors, academic counselors, and administrators can access student reflection reports to offer personalized guidance.',
       'Student data is strictly confidential and is never sold, traded, or used for commercial advertising.',
       'In a future school deployment phase, authorized staff may print physical report snapshots to share with participating schools under formal institutional agreements.',
     ],
@@ -79,7 +79,7 @@ const POLICY_ITEMS: PolicyAccordionItem[] = [
       'You agree to provide authentic responses, keep your password secure, and use the platform solely for personal educational reflection.',
     details: [
       'Students receive a personal, non-exclusive license to take the questionnaire, view insight dashboards, and print their own reflection summaries.',
-      'You are responsible for maintaining the confidentiality of your mobile number and password, and using the platform respectfully and constructively.',
+      'You are responsible for maintaining the confidentiality of your account credentials and password, and using the platform respectfully and constructively.',
     ],
     linkRoute: '/terms',
     linkLabel: 'Read Terms of Use',

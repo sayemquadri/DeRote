@@ -114,7 +114,7 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
                 <strong>Current Non-Involvement of Schools:</strong> Schools and school administrations are not involved in the current phase of the Platform. Schools do not have access to student accounts, digital records, or questionnaire responses.
               </p>
               <p>
-                <strong>Future Institutional Deployments:</strong> In a future phase, DeRote may enter into arrangements with schools. Under such arrangements, an authorized DeRote HOD or representative may print student reports and provide them to a school in accordance with applicable permissions and agreements.
+                <strong>Future Institutional Deployments:</strong> In a future phase, DeRote may enter into arrangements with schools. Under such arrangements, an authorized DeRote admin or representative may print student reports and provide them to a school in accordance with applicable permissions and agreements.
               </p>
             </div>
           </section>

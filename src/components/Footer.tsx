@@ -79,7 +79,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, className = '' }) =>
             className="inline-flex items-center gap-1.5 text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 py-1 rounded-lg shadow-xs transition-colors cursor-pointer"
           >
             <Shield className="w-3.5 h-3.5 text-[#0866C6]" />
-            <span>HOD / Admin Portal</span>
+            <span>Admin Portal</span>
           </button>
         </div>
       </div>

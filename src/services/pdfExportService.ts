@@ -72,7 +72,7 @@ export function exportCohortReportPdf(
   });
 
   const institution = admin?.institution || 'DeRote Partner School Network';
-  const coordinator = admin?.fullName || 'Academic Coordinator';
+  const adminName = admin?.fullName || 'Admin';
   const dateStr = new Date().toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'short',
@@ -98,9 +98,9 @@ export function exportCohortReportPdf(
   doc.setTextColor(COLOR_MUTED[0], COLOR_MUTED[1], COLOR_MUTED[2]);
   doc.text(`${institution} · Classes 8, 9, & 10 Cohort`, MARGIN_LEFT, y);
 
-  // Coordinator and Date on the right
+  // Admin and Date on the right
   doc.setFontSize(9);
-  doc.text(`Coordinator: ${coordinator}`, PAGE_WIDTH - MARGIN_RIGHT, y - 5, { align: 'right' });
+  doc.text(`Admin: ${adminName}`, PAGE_WIDTH - MARGIN_RIGHT, y - 5, { align: 'right' });
   doc.text(`Generated: ${dateStr}`, PAGE_WIDTH - MARGIN_RIGHT, y, { align: 'right' });
   y += 8;
 

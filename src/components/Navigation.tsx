@@ -8,7 +8,6 @@ import {
 import {
   onAdminAuthChange,
   AdminAccount,
-  PRIMARY_ADMIN_UID,
 } from '../services/adminService';
 
 interface NavigationProps {
@@ -33,9 +32,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
     };
   }, []);
 
-  const isSuperAdmin =
-    currentAdmin?.id === PRIMARY_ADMIN_UID ||
-    activeStudent?.id === PRIMARY_ADMIN_UID;
+  const isSuperAdmin = currentAdmin?.email === 'contact@derote.in';
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] transition-colors">
@@ -63,13 +60,14 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
             </button>
           ) : activeStudent ? (
             <button
-              onClick={() => onNavigate('/login')}
+              onClick={() => onNavigate('/dashboard')}
               type="button"
-              className="min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#0866C6] cursor-pointer shadow-xs bg-[#E8F3FF] text-[#0866C6] hover:bg-[#0866C6] hover:text-white"
-              title="View student profile and insights"
+              className="min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#2150D8] cursor-pointer shadow-xs bg-[#EBF2FE] text-[#2150D8] hover:bg-[#2150D8] hover:text-white"
+              title="Open personal student dashboard"
             >
               <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span className="max-w-[120px] sm:max-w-[180px] truncate">{activeStudent.fullName}</span>
+              <span className="hidden md:inline text-xs font-medium opacity-80">(Dashboard)</span>
             </button>
           ) : currentRoute !== '/login' ? (
             <>

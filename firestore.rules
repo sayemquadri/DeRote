@@ -30,20 +30,20 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.uid == 'HRmNP5WPw5fXtihxIVB2nkcCTkz1' ||
-        (request.auth.token.email == 'contact@derote.in' && request.auth.token.email_verified == true) ||
+        request.auth.token.email == 'contact@derote.in' ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
 
     // Student Validator
     function isValidStudent(data) {
-      return data.keys().hasAll(['id', 'fullName', 'classGrade', 'schoolName', 'phone', 'createdAt']) &&
+      return data.keys().hasAll(['id', 'fullName', 'classGrade', 'schoolName', 'createdAt']) &&
         data.id is string && data.id.size() <= 128 &&
         data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 120 &&
         data.classGrade is string && data.classGrade.size() <= 20 &&
         data.schoolName is string && data.schoolName.size() <= 200 &&
-        data.phone is string && data.phone.size() <= 20 &&
+        (!('phone' in data) || (data.phone is string && data.phone.size() <= 20)) &&
+        (!('email' in data) || (data.email is string && data.email.size() <= 150)) &&
         data.createdAt is string && data.createdAt.size() <= 50;
     }
 
@@ -93,6 +93,20 @@ service cloud.firestore {
                       incoming().createdAt == existing().createdAt;
         allow delete: if isValidId(studentId) && isValidId(sessionId) && isAdmin();
       }
+
+      // Nested Tasks Subcollection for Student Productivity
+      match /tasks/{taskId} {
+        allow get, list: if isValidId(studentId) && (isOwner(studentId) || isAdmin());
+        allow create, update: if isValidId(studentId) && isValidId(taskId) && (isOwner(studentId) || isAdmin());
+        allow delete: if isValidId(studentId) && isValidId(taskId) && (isOwner(studentId) || isAdmin());
+      }
+
+      // Nested Preferences Subcollection
+      match /preferences/{prefId} {
+        allow get, list: if isValidId(studentId) && (isOwner(studentId) || isAdmin());
+        allow create, update: if isValidId(studentId) && isValidId(prefId) && (isOwner(studentId) || isAdmin());
+        allow delete: if isValidId(studentId) && isValidId(prefId) && (isOwner(studentId) || isAdmin());
+      }
     }
 
     // Privacy & Data Requests Collection
@@ -107,12 +121,6 @@ service cloud.firestore {
     // Administrators Collection
     match /admins/{adminId} {
       allow read, write: if isValidId(adminId) && isAdmin();
-    }
-
-    // Files & Documents Collection (Admin has global read access; non-admins locked out)
-    match /files/{fileId} {
-      allow read: if isValidId(fileId) && isAdmin();
-      allow write: if isValidId(fileId) && isAdmin();
     }
   }
 }
