@@ -74,26 +74,26 @@ export function AdminLoginPage({
   return (
     <div className="min-h-screen bg-[#F4F8FD] flex flex-col justify-between text-[#102C46]">
       {/* Header */}
-      <header className="bg-white border-b border-[#E8F3FF] px-4 sm:px-8 py-3.5 sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="bg-white border-b border-[#E8F3FF] px-3 sm:px-8 py-2.5 sm:py-3.5 sticky top-0 z-20">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => onNavigate('/')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2.5 py-1.5 hover:bg-[#F4F8FD] cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2 sm:px-2.5 py-1.5 hover:bg-[#F4F8FD] cursor-pointer shrink-0"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back to Home</span>
+              <ArrowLeft className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Back to Home</span>
             </button>
-            <div className="h-4 w-px bg-[#E8F3FF]" />
+            <div className="h-4 w-px bg-[#E8F3FF] hidden sm:block" />
             <DeRoteWordmark size="sm" showDescriptor={false} />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
               onClick={() => onNavigate('/login')}
-              className="text-xs font-semibold text-[#0866C6] hover:text-[#062B50] px-3 py-1.5 rounded-lg border border-[#E8F3FF] bg-white shadow-xs cursor-pointer"
+              className="text-xs font-semibold text-[#0866C6] hover:text-[#062B50] px-2.5 sm:px-3 py-1.5 rounded-lg border border-[#E8F3FF] bg-white shadow-xs cursor-pointer whitespace-nowrap"
             >
               Student Portal
             </button>
@@ -102,8 +102,8 @@ export function AdminLoginPage({
       </header>
 
       {/* Main Login Card */}
-      <main className="flex-1 max-w-lg w-full mx-auto px-4 py-10 sm:py-16 flex flex-col justify-center">
-        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-[#E8F3FF] shadow-xl shadow-[#062B50]/5 relative overflow-hidden">
+      <main className="flex-1 max-w-lg w-full mx-auto px-3 sm:px-4 py-8 sm:py-16 flex flex-col justify-center">
+        <div className="bg-white rounded-3xl p-5 sm:p-10 border border-[#E8F3FF] shadow-xl shadow-[#062B50]/5 relative overflow-hidden">
           {/* Top Blue Accent */}
           <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#0866C6] via-[#168FE5] to-[#42A5F5]" />
 

@@ -153,36 +153,39 @@ Evidence: ${c.evidence
   };
 
   return (
-    <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 animate-fadeIn">
+    <div className="max-w-4xl mx-auto w-full px-3 sm:px-6 py-4 sm:py-10 animate-fadeIn">
       {/* Top Identity & Action Header */}
-      <div className="flex items-center justify-between gap-4 mb-8">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
         <button
           type="button"
           onClick={() => onNavigate('/login')}
-          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2.5 py-1.5 bg-white border border-[#E8F3FF] shadow-xs cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2 sm:px-2.5 py-1.5 bg-white border border-[#E8F3FF] shadow-xs cursor-pointer shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Student Portal</span>
+          <span className="hidden sm:inline">Student Portal</span>
+          <span className="sm:hidden">Portal</span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             type="button"
             onClick={onRetake}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#64778C] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-lg shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#64778C] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 sm:px-3 py-1.5 rounded-lg shadow-xs transition-colors cursor-pointer"
             title="Retake Questionnaire"
           >
             <RotateCcw className="w-3.5 h-3.5 text-[#0866C6]" />
-            <span>Retake Assessment</span>
+            <span className="hidden sm:inline">Retake Assessment</span>
+            <span className="sm:hidden">Retake</span>
           </button>
           <button
             type="button"
             onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#465B72] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-lg shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#465B72] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 sm:px-3 py-1.5 rounded-lg shadow-xs transition-colors cursor-pointer"
             title="Save or Print Snapshot"
           >
             <Printer className="w-3.5 h-3.5 text-[#0866C6]" />
             <span className="hidden sm:inline">Print / Save</span>
+            <span className="sm:hidden">Print</span>
           </button>
         </div>
       </div>
@@ -193,13 +196,13 @@ Evidence: ${c.evidence
         <div className="h-2 bg-gradient-to-r from-[#0866C6] via-[#168FE5] to-[#42A5F5]" />
 
         {/* Dashboard Header Section */}
-        <div className="p-6 sm:p-10 border-b border-[#F0F5FA] text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+        <div className="p-5 sm:p-10 border-b border-[#F0F5FA] text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4">
             <DeRoteWordmark size="md" showDescriptor={false} />
 
             <div className="inline-flex items-center justify-center sm:justify-start gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#E8F3FF] text-[#0866C6] self-center sm:self-auto">
               <CheckCircle2 className="w-3.5 h-3.5 text-[#0866C6]" />
-              <span>{report.studentName} · {report.classGrade}</span>
+              <span className="break-words">{report.studentName} · {report.classGrade}</span>
             </div>
           </div>
 

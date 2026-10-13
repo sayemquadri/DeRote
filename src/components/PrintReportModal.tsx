@@ -265,23 +265,23 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
         </div>
 
         {/* Action Toolbar */}
-        <div className="px-5 py-3.5 bg-[#F4F8FD] border-b border-[#E8F3FF] flex flex-wrap items-center gap-2.5 justify-between">
-          <div className="flex items-center gap-2">
+        <div className="px-4 sm:px-5 py-3 sm:py-3.5 bg-[#F4F8FD] border-b border-[#E8F3FF] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-between">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={handlePdfClick}
               disabled={isPdfGenerating}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] active:scale-[0.98] transition-all shadow-xs cursor-pointer disabled:opacity-70"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] active:scale-[0.98] transition-all shadow-xs cursor-pointer disabled:opacity-70 whitespace-nowrap"
               title="Download high-resolution official PDF document"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{isPdfGenerating ? 'Generating PDF...' : 'Download PDF (.pdf)'}</span>
+              <span>{isPdfGenerating ? 'Generating...' : 'Download PDF'}</span>
             </button>
 
             <button
               type="button"
               onClick={handleBrowserPrint}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-[#062B50] hover:text-[#0866C6] border border-[#D5E9FF] font-semibold text-xs hover:bg-[#F8FAFD] active:scale-[0.98] transition-all shadow-xs cursor-pointer"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white text-[#062B50] hover:text-[#0866C6] border border-[#D5E9FF] font-semibold text-xs hover:bg-[#F8FAFD] active:scale-[0.98] transition-all shadow-xs cursor-pointer whitespace-nowrap"
               title="Trigger browser print or system save"
             >
               <Printer className="w-3.5 h-3.5 text-[#0866C6]" />
@@ -302,7 +302,7 @@ export const PrintReportModal: React.FC<PrintReportModalProps> = ({
           <button
             type="button"
             onClick={handleCopyText}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-[#465B72] hover:text-[#062B50] border border-[#E8F3FF] font-semibold text-xs hover:bg-[#F8FAFD] transition-colors cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white text-[#465B72] hover:text-[#062B50] border border-[#E8F3FF] font-semibold text-xs hover:bg-[#F8FAFD] transition-colors cursor-pointer"
           >
             {copied ? (
               <>

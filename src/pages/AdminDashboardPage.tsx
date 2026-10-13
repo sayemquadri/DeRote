@@ -22,6 +22,9 @@ import {
   X,
   Sparkles,
   Info,
+  Building2,
+  MapPin,
+  School,
 } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import {
@@ -46,6 +49,7 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
   const [activeTab, setActiveTab] = useState<'cohort' | 'roster' | 'questions'>('cohort');
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState<'all' | '8' | '9' | '10'>('all');
+  const [schoolFilter, setSchoolFilter] = useState<string>('all');
   const [selectedStudent, setSelectedStudent] = useState<StudentAdminRecord | null>(null);
 
   const [printModalConfig, setPrintModalConfig] = useState<{
@@ -83,6 +87,31 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
     return calculateCohortAnalytics(studentRecords);
   }, [studentRecords]);
 
+  const availableSchools = useMemo(() => {
+    const set = new Set<string>();
+    studentRecords.forEach((r) => {
+      if (r.schoolName && r.schoolName.trim()) {
+        set.add(r.schoolName.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [studentRecords]);
+
+  const schoolDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    studentRecords.forEach((r) => {
+      const s = r.schoolName ? r.schoolName.trim() : 'Unspecified';
+      counts[s] = (counts[s] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percentage: studentRecords.length > 0 ? Math.round((count / studentRecords.length) * 100) : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+  }, [studentRecords]);
+
   const filteredRecords = useMemo(() => {
     return studentRecords.filter((rec) => {
       const matchesSearch =
@@ -93,9 +122,12 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
       const matchesClass =
         classFilter === 'all' || rec.classGrade.includes(classFilter);
 
-      return matchesSearch && matchesClass;
+      const matchesSchool =
+        schoolFilter === 'all' || rec.schoolName.trim().toLowerCase() === schoolFilter.trim().toLowerCase();
+
+      return matchesSearch && matchesClass && matchesSchool;
     });
-  }, [studentRecords, searchQuery, classFilter]);
+  }, [studentRecords, searchQuery, classFilter, schoolFilter]);
 
   const handleSignOut = () => {
     signOutAdmin();
@@ -293,18 +325,19 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
   return (
     <div className="min-h-screen bg-[#F4F8FD] flex flex-col text-[#102C46]">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] px-4 sm:px-8 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] px-3 sm:px-8 py-2.5 sm:py-3.5">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <DeRoteWordmark size="sm" showDescriptor={false} />
             <div className="h-4 w-px bg-[#E8F3FF] hidden sm:block" />
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-[#0866C6] bg-[#E8F3FF] px-2.5 py-1 rounded-full">
-              <Shield className="w-3.5 h-3.5" />
-              <span>HOD & Administrator Dashboard</span>
+            <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-[#0866C6] bg-[#E8F3FF] px-2 sm:px-2.5 py-1 rounded-full whitespace-nowrap shrink-0">
+              <Shield className="w-3 sm:w-3.5 h-3 sm:h-3.5 shrink-0" />
+              <span className="hidden sm:inline">HOD & Administrator Dashboard</span>
+              <span className="sm:hidden">Admin</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {admin && (
               <div className="hidden md:flex items-center gap-2.5 bg-[#F4F8FD] border border-[#E8F3FF] px-3.5 py-1.5 rounded-full text-xs">
                 <span className="w-6 h-6 rounded-full bg-[#0866C6] text-white flex items-center justify-center font-bold text-[10px]">
@@ -334,7 +367,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
             <button
               type="button"
               onClick={() => onNavigate('/prototype')}
-              className="text-xs font-semibold text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-xl shadow-xs cursor-pointer"
+              className="text-xs font-semibold text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 sm:px-3 py-1.5 rounded-xl shadow-xs cursor-pointer whitespace-nowrap"
             >
               Student Portal
             </button>
@@ -342,7 +375,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
             <button
               type="button"
               onClick={handleSignOut}
-              className="p-2 rounded-xl text-[#64778C] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl text-[#64778C] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
               title="Sign Out Admin"
             >
               <LogOut className="w-4 h-4" />
@@ -352,14 +385,14 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 sm:space-y-6">
         {/* Institutional Welcome & Headline */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8F3FF] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          <div>
+        <div className="bg-white rounded-3xl p-5 sm:p-8 border border-[#E8F3FF] shadow-xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 sm:gap-6">
+          <div className="min-w-0 flex-1">
             <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0866C6] uppercase tracking-wider mb-1">
-              <span>{admin?.institution || 'DeRote Partner School Network'}</span>
+              <span className="break-words">{admin?.institution || 'DeRote Partner School Network'}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#062B50] tracking-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#062B50] tracking-tight break-words leading-tight">
               Cohort Insight & Learning Environment Overview
             </h1>
             <p className="text-xs sm:text-sm text-[#64778C] mt-2 max-w-2xl leading-relaxed">
@@ -367,11 +400,11 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-stretch lg:self-auto bg-[#F4F8FD] p-1.5 rounded-2xl border border-[#E8F3FF]">
+          <div className="w-full lg:w-auto flex items-center gap-1.5 sm:gap-2 self-stretch lg:self-auto bg-[#F4F8FD] p-1.5 rounded-2xl border border-[#E8F3FF] overflow-x-auto no-scrollbar scroll-smooth">
             <button
               type="button"
               onClick={() => setActiveTab('cohort')}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'cohort'
                   ? 'bg-white text-[#0866C6] shadow-xs'
                   : 'text-[#64778C] hover:text-[#062B50]'
@@ -386,7 +419,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
             <button
               type="button"
               onClick={() => setActiveTab('roster')}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'roster'
                   ? 'bg-white text-[#0866C6] shadow-xs'
                   : 'text-[#64778C] hover:text-[#062B50]'
@@ -401,7 +434,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
             <button
               type="button"
               onClick={() => setActiveTab('questions')}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`shrink-0 whitespace-nowrap px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'questions'
                   ? 'bg-white text-[#0866C6] shadow-xs'
                   : 'text-[#64778C] hover:text-[#062B50]'
@@ -416,7 +449,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
         </div>
 
         {/* Top 4 KPI Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white p-5 rounded-2xl border border-[#E8F3FF] shadow-xs">
             <span className="text-[11px] font-bold text-[#64778C] uppercase tracking-wider block">
               Registered Students
@@ -657,6 +690,58 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                 </div>
               </div>
             </div>
+
+            {/* Participating Schools Representation */}
+            <div className="bg-white p-6 rounded-3xl border border-[#E8F3FF] shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-[#F0F7FF] flex items-center justify-center text-[#0866C6]">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#062B50]">
+                      Participating Schools Representation ({schoolDistribution.length})
+                    </h3>
+                    <p className="text-[11px] text-[#64778C]">
+                      Enrolled students grouped by institutional affiliation
+                    </p>
+                  </div>
+                </div>
+
+                <span className="text-[11px] font-semibold text-[#0866C6] bg-[#E8F3FF] px-2.5 py-1 rounded-full self-start sm:self-auto">
+                  Click any school to filter student submissions
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {schoolDistribution.map((sch) => (
+                  <button
+                    key={sch.name}
+                    type="button"
+                    onClick={() => {
+                      setSchoolFilter(sch.name);
+                      setActiveTab('roster');
+                    }}
+                    className="p-3.5 rounded-2xl bg-[#F8FAFD] hover:bg-[#EAF1FF] border border-[#E8F3FF] hover:border-[#D5E9FF] transition-all text-left group cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-bold text-xs text-[#062B50] group-hover:text-[#0866C6] transition-colors truncate">
+                        {sch.name}
+                      </span>
+                      <span className="text-xs font-bold text-[#0866C6] bg-white px-2 py-0.5 rounded-md border border-[#E8F3FF] shrink-0">
+                        {sch.count} {sch.count === 1 ? 'student' : 'students'}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[11px] text-[#64778C]">
+                      <span>{sch.percentage}% of cohort</span>
+                      <span className="font-semibold text-[#0866C6] group-hover:underline">
+                        Filter Roster →
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -664,8 +749,8 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
         {activeTab === 'roster' && (
           <div className="bg-white rounded-3xl border border-[#E8F3FF] shadow-xs overflow-hidden animate-fadeIn">
             {/* Search and Filters Bar */}
-            <div className="p-5 border-b border-[#F0F5FA] flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="relative w-full sm:w-72">
+            <div className="p-5 border-b border-[#F0F5FA] flex flex-col lg:flex-row items-center justify-between gap-4">
+              <div className="relative w-full lg:w-72">
                 <Search className="w-4 h-4 text-[#64778C] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
@@ -676,29 +761,156 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                 />
               </div>
 
-              <div className="flex items-center gap-1.5 w-full sm:w-auto">
-                <span className="text-xs font-semibold text-[#64778C] mr-1 hidden sm:inline">
-                  Filter Class:
-                </span>
-                {(['all', '8', '9', '10'] as const).map((cls) => (
-                  <button
-                    key={cls}
-                    type="button"
-                    onClick={() => setClassFilter(cls)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      classFilter === cls
-                        ? 'bg-[#0866C6] text-white'
-                        : 'bg-[#F4F8FD] text-[#64778C] hover:text-[#062B50]'
-                    }`}
+              <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+                {/* School Filter Dropdown */}
+                <div className="flex items-center gap-1.5 bg-[#F4F8FD] px-3 py-1.5 rounded-xl border border-[#E8F3FF]">
+                  <Building2 className="w-3.5 h-3.5 text-[#0866C6] shrink-0" />
+                  <span className="text-xs font-semibold text-[#64778C] hidden sm:inline">
+                    School:
+                  </span>
+                  <select
+                    value={schoolFilter}
+                    onChange={(e) => setSchoolFilter(e.target.value)}
+                    className="bg-transparent text-xs font-bold text-[#062B50] focus:outline-none cursor-pointer max-w-[170px] sm:max-w-[210px] truncate"
+                    title="Filter students by school name"
                   >
-                    {cls === 'all' ? 'All Classes' : `Class ${cls}`}
+                    <option value="all">All Schools ({availableSchools.length})</option>
+                    {availableSchools.map((sch) => (
+                      <option key={sch} value={sch}>
+                        {sch}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Class Filter */}
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-semibold text-[#64778C] mr-1 hidden sm:inline">
+                    Class:
+                  </span>
+                  {(['all', '8', '9', '10'] as const).map((cls) => (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setClassFilter(cls)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        classFilter === cls
+                          ? 'bg-[#0866C6] text-white shadow-xs'
+                          : 'bg-[#F4F8FD] text-[#64778C] hover:text-[#062B50]'
+                      }`}
+                    >
+                      {cls === 'all' ? 'All' : `Class ${cls}`}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Reset Filters Chip */}
+                {(schoolFilter !== 'all' || classFilter !== 'all' || searchQuery) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSchoolFilter('all');
+                      setClassFilter('all');
+                      setSearchQuery('');
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-red-600 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                    title="Clear all active filters"
+                  >
+                    <X className="w-3 h-3" />
+                    <span>Reset</span>
                   </button>
-                ))}
+                )}
               </div>
             </div>
 
-            {/* Students Table */}
-            <div className="overflow-x-auto">
+            {/* Students Table & Mobile Card List */}
+            {/* Mobile View: Clean Card List */}
+            <div className="block sm:hidden divide-y divide-[#F0F5FA]">
+              {filteredRecords.map((record) => {
+                const topTheme = record.insightReport.cards[0]?.heading || 'In Progress';
+
+                return (
+                  <div key={record.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-bold text-sm text-[#062B50] break-words">
+                          {record.fullName}
+                        </div>
+                        <div className="text-xs text-[#64778C] flex items-center gap-1.5 mt-0.5">
+                          <span className="font-semibold text-[#0866C6] bg-[#E8F3FF] px-2 py-0.5 rounded-md">
+                            {record.classGrade}
+                          </span>
+                          <span>·</span>
+                          <span>{record.phone}</span>
+                        </div>
+                      </div>
+
+                      {record.isSubmitted ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full shrink-0">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          <span>Done</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full shrink-0">
+                          <Clock className="w-3 h-3 text-amber-600" />
+                          <span>Draft</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="text-xs text-[#465B72] bg-[#F8FAFD] p-2.5 rounded-xl border border-[#E8F3FF] space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-[#64778C]">School:</span>
+                        <span className="font-semibold text-[#062B50] break-words text-right max-w-[200px]">
+                          {record.schoolName}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#E8F3FF]/60">
+                        <span className="text-[#64778C]">Reflected Theme:</span>
+                        <span className="font-semibold text-[#0866C6] truncate max-w-[180px]">
+                          {topTheme}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#E8F3FF]/60">
+                        <span className="text-[#64778C]">Questions Answered:</span>
+                        <span className="font-bold text-[#062B50]">
+                          {record.answeredCount} / {record.totalQuestions}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedStudent(record)}
+                      className="w-full min-h-[40px] rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Inspect Responses & Insights</span>
+                    </button>
+                  </div>
+                );
+              })}
+
+              {filteredRecords.length === 0 && (
+                <div className="py-10 px-4 text-center text-xs text-[#64778C] space-y-2">
+                  <p>No student records found matching the current filters.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSchoolFilter('all');
+                      setClassFilter('all');
+                      setSearchQuery('');
+                    }}
+                    className="text-xs font-bold text-[#0866C6] hover:underline cursor-pointer"
+                  >
+                    Reset all filters
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop View: Full Data Table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#F8FAFD] text-[#64778C] font-bold border-b border-[#E8F3FF]">
                   <tr>
@@ -765,8 +977,19 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
               </table>
 
               {filteredRecords.length === 0 && (
-                <div className="py-12 text-center text-xs text-[#64778C]">
-                  No student records found matching "{searchQuery}".
+                <div className="py-12 text-center text-xs text-[#64778C] space-y-2">
+                  <p>No student records found matching the current filters.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSchoolFilter('all');
+                      setClassFilter('all');
+                      setSearchQuery('');
+                    }}
+                    className="text-xs font-bold text-[#0866C6] hover:underline cursor-pointer"
+                  >
+                    Reset all filters
+                  </button>
                 </div>
               )}
             </div>
@@ -834,29 +1057,29 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
 
       {/* STUDENT DETAIL MODAL */}
       {selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
           <div
             className="fixed inset-0 bg-[#062B50]/50 backdrop-blur-xs transition-opacity"
             onClick={() => setSelectedStudent(null)}
           />
 
-          <div className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-3xl shadow-2xl border border-[#E8F3FF] flex flex-col z-10 overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-3xl max-h-[92vh] bg-white rounded-3xl shadow-2xl border border-[#E8F3FF] flex flex-col z-10 overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="p-6 border-b border-[#F0F5FA] flex items-start justify-between gap-4 bg-[#FAFCFF]">
-              <div>
-                <span className="text-[11px] font-extrabold tracking-wider uppercase text-[#0866C6] block mb-1">
+            <div className="p-4 sm:p-6 border-b border-[#F0F5FA] flex items-start justify-between gap-3 bg-[#FAFCFF]">
+              <div className="min-w-0 flex-1">
+                <span className="text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase text-[#0866C6] block mb-1">
                   Student Submission Inspection
                 </span>
-                <h2 className="text-xl font-bold text-[#062B50]">
+                <h2 className="text-lg sm:text-xl font-bold text-[#062B50] break-words">
                   {selectedStudent.fullName}
                 </h2>
-                <div className="flex items-center gap-2 mt-1 text-xs text-[#64778C]">
-                  <span>{selectedStudent.classGrade}</span>
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1 text-xs text-[#64778C]">
+                  <span className="font-semibold text-[#0866C6]">{selectedStudent.classGrade}</span>
                   <span>·</span>
-                  <span>{selectedStudent.schoolName}</span>
+                  <span className="break-words">{selectedStudent.schoolName}</span>
                   <span>·</span>
-                  <span className="font-semibold text-emerald-600">
-                    {selectedStudent.answeredCount} / {selectedStudent.totalQuestions} Questions Answered
+                  <span className="font-semibold text-emerald-600 whitespace-nowrap">
+                    {selectedStudent.answeredCount} / {selectedStudent.totalQuestions} Answered
                   </span>
                 </div>
               </div>
@@ -864,14 +1087,14 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
               <button
                 type="button"
                 onClick={() => setSelectedStudent(null)}
-                className="p-2 rounded-xl text-[#64778C] hover:text-[#062B50] hover:bg-[#F4F8FD] transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl text-[#64778C] hover:text-[#062B50] hover:bg-[#F4F8FD] transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Scrollable Content */}
-            <div className="p-6 overflow-y-auto space-y-6">
+            <div className="p-4 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6">
               {/* Generated Insight Cards for Student */}
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-[#64778C] mb-3">
@@ -959,11 +1182,11 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-[#F0F5FA] bg-[#FAFCFF] flex items-center justify-between gap-2">
+            <div className="p-3.5 sm:p-4 border-t border-[#F0F5FA] bg-[#FAFCFF] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => handlePrintStudent(selectedStudent)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-[#D5E9FF] text-[#062B50] hover:text-[#0866C6] font-bold text-xs hover:bg-[#F8FAFD] transition-colors shadow-xs cursor-pointer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white border border-[#D5E9FF] text-[#062B50] hover:text-[#0866C6] font-bold text-xs hover:bg-[#F8FAFD] transition-colors shadow-xs cursor-pointer"
                 title="Print or export this student's insight report"
               >
                 <Printer className="w-3.5 h-3.5 text-[#0866C6]" />
@@ -973,7 +1196,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
               <button
                 type="button"
                 onClick={() => setSelectedStudent(null)}
-                className="px-5 py-2 rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] transition-colors cursor-pointer text-center"
               >
                 Close Inspection
               </button>

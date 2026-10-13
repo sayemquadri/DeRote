@@ -228,32 +228,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 
             {/* Active Student Card */}
             {activeStudent ? (
-              <div className="mb-6 p-5 rounded-2xl bg-gradient-to-br from-[#E8F3FF] to-white border border-[#168FE5]/30 shadow-xs text-left">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#0866C6] text-white flex items-center justify-center font-extrabold text-lg shadow-sm">
+              <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#E8F3FF] to-white border border-[#168FE5]/30 shadow-xs text-left">
+                <div className="flex items-start justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#0866C6] text-white flex items-center justify-center font-extrabold text-base sm:text-lg shadow-sm shrink-0">
                       {activeStudent.fullName.charAt(0)}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-extrabold text-[#062B50]">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-sm sm:text-base font-extrabold text-[#062B50] break-words">
                           {activeStudent.fullName}
                         </span>
                         {activeStudent.isDemo && (
-                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#168FE5]/20 text-[#0866C6]">
+                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#168FE5]/20 text-[#0866C6] whitespace-nowrap shrink-0">
                             Demo Student
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-[#64778C] mt-0.5">
-                        {activeStudent.classGrade} · {activeStudent.schoolName}
+                      <p className="text-xs text-[#64778C] mt-0.5 break-words font-medium">
+                        {activeStudent.classGrade}
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="p-2 rounded-xl text-[#64778C] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                    className="p-1.5 sm:p-2 rounded-xl text-[#64778C] hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
                     title="Sign Out"
                     aria-label="Sign Out"
                   >
@@ -262,14 +262,20 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                 </div>
 
                 {/* Profile Details for signed-in student */}
-                <div className="mt-4 pt-3.5 border-t border-[#168FE5]/20 grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <span className="text-[#64778C] block text-[11px]">School</span>
-                    <span className="font-bold text-[#062B50] truncate block">{activeStudent.schoolName}</span>
-                  </div>
-                  <div>
-                    <span className="text-[#64778C] block text-[11px]">Questionnaire</span>
-                    <span className="font-bold text-[#0866C6]">14 Reflections</span>
+                <div className="mt-3.5 pt-3 border-t border-[#168FE5]/20 space-y-2 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                    <div className="min-w-0 flex-1">
+                      <span className="text-[#64778C] block text-[11px] font-medium">Enrolled School</span>
+                      <span className="font-bold text-[#062B50] break-words text-xs leading-snug">
+                        {activeStudent.schoolName}
+                      </span>
+                    </div>
+                    <div className="shrink-0 flex items-center justify-between sm:block pt-1 sm:pt-0 border-t sm:border-0 border-[#168FE5]/10">
+                      <span className="text-[#64778C] block text-[11px] font-medium">Questionnaire</span>
+                      <span className="font-bold text-[#0866C6] text-xs whitespace-nowrap">
+                        14 Reflections
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -278,15 +284,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('/prototype')}
-                    className="w-full min-h-[44px] rounded-xl bg-[#0866C6] text-white font-bold text-sm hover:bg-[#062B50] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                    className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-[#0866C6] text-white font-bold text-xs sm:text-sm hover:bg-[#062B50] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
                   >
                     <span>Launch Questionnaire Assessment</span>
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 shrink-0" />
                   </button>
                   <button
                     type="button"
                     onClick={() => onNavigate('/')}
-                    className="w-full min-h-[40px] rounded-xl bg-white text-[#062B50] border border-[#062B50]/15 font-semibold text-xs hover:bg-[#F4F8FD] transition-colors cursor-pointer"
+                    className="w-full min-h-[40px] px-4 py-2 rounded-xl bg-white text-[#062B50] border border-[#062B50]/15 font-semibold text-xs hover:bg-[#F4F8FD] transition-colors cursor-pointer text-center"
                   >
                     Return to Homepage
                   </button>
@@ -318,13 +324,15 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
             )}
 
             {/* Instant Demo Student Login Section */}
-            <div className="mb-6 p-4.5 rounded-2xl bg-[#F4F8FD] border border-[#E8F3FF] text-left">
-              <div className="flex items-center justify-between mb-3">
+            <div className="mb-6 p-3.5 sm:p-4.5 rounded-2xl bg-[#F4F8FD] border border-[#E8F3FF] text-left">
+              <div className="flex items-center justify-between mb-3 gap-2">
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0866C6]">
-                  <Sparkles className="w-4 h-4 text-[#0866C6]" />
+                  <Sparkles className="w-4 h-4 text-[#0866C6] shrink-0" />
                   <span>Instant 1-Click Demo Login</span>
                 </span>
-                <span className="text-[11px] font-semibold text-[#64778C]">No credentials needed</span>
+                <span className="text-[10px] sm:text-[11px] font-semibold text-[#64778C] whitespace-nowrap">
+                  No credentials needed
+                </span>
               </div>
 
               {/* Persona Selector Tabs */}
@@ -334,13 +342,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                     key={demo.id}
                     type="button"
                     onClick={() => setSelectedDemoId(demo.id)}
-                    className={`p-2 rounded-xl text-center text-xs transition-all border cursor-pointer ${
+                    className={`p-1.5 sm:p-2 rounded-xl text-center text-xs transition-all border cursor-pointer ${
                       selectedDemoId === demo.id
                         ? 'bg-white border-[#0866C6] text-[#0866C6] font-bold shadow-xs'
                         : 'bg-transparent border-transparent text-[#64778C] hover:text-[#062B50]'
                     }`}
                   >
-                    <div className="truncate font-bold">{demo.fullName.split(' ')[0]}</div>
+                    <div className="truncate font-bold text-[11px] sm:text-xs">{demo.fullName.split(' ')[0]}</div>
                     <div className="text-[10px] opacity-75">{demo.classGrade}</div>
                   </button>
                 ))}
@@ -353,11 +361,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                 return (
                   <div>
                     <div className="bg-white p-3 rounded-xl border border-[#E8F3FF] mb-3 text-xs">
-                      <div className="flex items-center justify-between font-bold text-[#062B50] mb-0.5">
-                        <span>{selected.fullName}</span>
-                        <span className="text-[#0866C6] text-[11px]">{selected.classGrade}</span>
+                      <div className="flex items-center justify-between font-bold text-[#062B50] mb-0.5 gap-2">
+                        <span className="break-words">{selected.fullName}</span>
+                        <span className="text-[#0866C6] text-[11px] shrink-0">{selected.classGrade}</span>
                       </div>
-                      <p className="text-[11px] text-[#64778C] truncate mb-2">{selected.schoolName}</p>
+                      <p className="text-[11px] text-[#64778C] break-words mb-2 leading-tight">{selected.schoolName}</p>
                       <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[#F4F8FD]">
                         <span className="text-[#64778C]">Self-Reflection Portal</span>
                         <span className="font-semibold text-[#0866C6]">
@@ -366,7 +374,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => handleDemoSignIn(selected.id)}

@@ -5,6 +5,7 @@ import {
   registerLocalStudent,
   isValidIndianMobile,
 } from '../services/localAuth';
+import { SchoolAutocompleteInput } from '../components/SchoolAutocompleteInput';
 
 interface SignupPageProps {
   onNavigate: (route: string) => void;
@@ -157,20 +158,20 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
       </header>
 
       {/* Main Registration Form Container */}
-      <main className="relative z-10 flex-1 flex flex-col justify-center items-center px-4 sm:px-6 py-8 sm:py-14">
+      <main className="relative z-10 flex-1 flex flex-col justify-center items-center px-3 sm:px-6 py-6 sm:py-14">
         <div className="w-full max-w-[480px]">
           {/* Form Card */}
-          <div className="bg-white rounded-3xl p-6 sm:p-9 border border-[#E8F3FF] shadow-xl shadow-[#062B50]/5">
+          <div className="bg-white rounded-3xl p-5 sm:p-9 border border-[#E8F3FF] shadow-xl shadow-[#062B50]/5">
             {/* Header info */}
-            <div className="mb-6 text-left">
+            <div className="mb-5 sm:mb-6 text-left">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-[#0866C6] mb-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#168FE5]" aria-hidden="true" />
                 Student Registration
               </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#062B50]">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-[#062B50]">
                 Let's get to know you.
               </h1>
-              <p className="text-sm sm:text-[15px] text-[#64778C] mt-1.5">
+              <p className="text-xs sm:text-sm text-[#64778C] mt-1.5">
                 Create your student profile to begin your reflection journey.
               </p>
             </div>
@@ -250,7 +251,7 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
                 )}
               </div>
 
-              {/* School Name */}
+              {/* School Name with Autocomplete */}
               <div>
                 <label
                   htmlFor="signup-schoolName"
@@ -258,21 +259,17 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
                 >
                   School Name <span className="text-red-500">*</span>
                 </label>
-                <input
+                <SchoolAutocompleteInput
                   id="signup-schoolName"
-                  type="text"
                   value={schoolName}
-                  onChange={(e) => {
-                    setSchoolName(e.target.value);
+                  onChange={(val) => {
+                    setSchoolName(val);
                     if (errors.schoolName) setErrors((prev) => ({ ...prev, schoolName: '' }));
                   }}
-                  placeholder="e.g. Delhi Public School"
                   disabled={isLoading}
-                  className="w-full min-h-[48px] px-3.5 rounded-xl border border-[#062B50]/15 focus:border-[#0866C6] focus:ring-2 focus:ring-[#0866C6]/20 outline-none text-sm sm:text-base text-[#102C46]"
+                  placeholder="Type or select your school (e.g. Delhi Public School, National Public School...)"
+                  error={errors.schoolName}
                 />
-                {errors.schoolName && (
-                  <p className="mt-1 text-xs text-red-500 font-medium">{errors.schoolName}</p>
-                )}
               </div>
 
               {/* Mobile Number */}

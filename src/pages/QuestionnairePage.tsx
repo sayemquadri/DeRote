@@ -285,23 +285,23 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   return (
     <div className="min-h-screen bg-[#F4F8FD] flex flex-col justify-between text-[#102C46]">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] px-4 sm:px-8 py-3.5">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] px-3 sm:px-8 py-2.5 sm:py-3.5">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => onNavigate('/login')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2 py-1 -ml-2 cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors rounded-lg px-2 py-1 -ml-2 cursor-pointer shrink-0"
             >
               <ArrowLeft className="w-4 h-4 shrink-0" />
               <span className="hidden sm:inline">Portal</span>
             </button>
-            <div className="h-4 w-px bg-[#E8F3FF]" />
+            <div className="h-4 w-px bg-[#E8F3FF] hidden sm:block" />
             <DeRoteWordmark size="sm" showDescriptor={false} />
           </div>
 
           {/* Student Status & Save Indicator */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <div className="hidden md:flex items-center gap-2 text-xs text-[#64778C] bg-[#F4F8FD] px-3 py-1.5 rounded-full border border-[#E8F3FF]">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>
@@ -310,9 +310,9 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
             </div>
 
             {student && (
-              <div className="flex items-center gap-2 bg-[#E8F3FF]/70 px-3 py-1.5 rounded-full text-xs font-medium text-[#062B50]">
-                <User className="w-3.5 h-3.5 text-[#0866C6]" />
-                <span className="font-bold">{student.fullName}</span>
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-[#E8F3FF]/70 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-xs font-medium text-[#062B50] max-w-[130px] sm:max-w-none">
+                <User className="w-3.5 h-3.5 text-[#0866C6] shrink-0" />
+                <span className="font-bold truncate">{student.fullName}</span>
                 <span className="text-[#64778C] hidden sm:inline">(Class {student.classGrade})</span>
               </div>
             )}
@@ -320,10 +320,11 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
             <button
               type="button"
               onClick={() => setShowDrawer(!showDrawer)}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0866C6] bg-white border border-[#0866C6]/30 px-3 py-1.5 rounded-full hover:bg-[#E8F3FF] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 sm:gap-1.5 text-xs font-bold text-[#0866C6] bg-white border border-[#0866C6]/30 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full hover:bg-[#E8F3FF] transition-colors cursor-pointer shrink-0 whitespace-nowrap"
             >
               <ListOrdered className="w-3.5 h-3.5" />
-              <span>Questions (14)</span>
+              <span className="hidden sm:inline">Questions (14)</span>
+              <span className="sm:hidden">14 Qs</span>
             </button>
           </div>
         </div>

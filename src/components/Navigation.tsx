@@ -29,23 +29,23 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-18 flex items-center justify-between gap-4">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-18 flex items-center justify-between gap-2 sm:gap-4">
         {/* Brand Zone */}
         <button
           onClick={() => onNavigate('/')}
-          className="flex items-center text-left focus-visible:outline-2 focus-visible:outline-[#0866C6] rounded-lg cursor-pointer"
+          className="flex items-center text-left focus-visible:outline-2 focus-visible:outline-[#0866C6] rounded-lg cursor-pointer shrink-0"
           aria-label="DeRote Student Insight - Home"
         >
           <DeRoteWordmark showDescriptor={true} size="md" />
         </button>
 
         {/* Action Zone: Sign in, Demo Login, or Active Student Status */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {activeStudent ? (
             <button
               onClick={() => onNavigate('/login')}
               type="button"
-              className={`min-h-[40px] sm:min-h-[44px] px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#0866C6] cursor-pointer shadow-xs ${
+              className={`min-h-[38px] sm:min-h-[44px] px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#0866C6] cursor-pointer shadow-xs ${
                 activeStudent.isDemo
                   ? 'bg-[#E8F3FF] text-[#0866C6] border border-[#168FE5]/30 hover:bg-[#0866C6] hover:text-white'
                   : 'bg-[#E8F3FF] text-[#0866C6] hover:bg-[#0866C6] hover:text-white'
@@ -54,16 +54,16 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
             >
               {activeStudent.isDemo ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-[#168FE5] animate-pulse" />
-                  <span className="max-w-[120px] sm:max-w-[150px] truncate">{activeStudent.fullName}</span>
+                  <span className="w-2 h-2 rounded-full bg-[#168FE5] animate-pulse shrink-0" />
+                  <span className="max-w-[85px] sm:max-w-[150px] truncate">{activeStudent.fullName}</span>
                   <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md bg-[#168FE5]/15 text-[#0866C6]">
                     Demo
                   </span>
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-4 h-4 text-emerald-600" />
-                  <span className="max-w-[120px] sm:max-w-[150px] truncate">{activeStudent.fullName}</span>
+                  <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span className="max-w-[85px] sm:max-w-[150px] truncate">{activeStudent.fullName}</span>
                 </>
               )}
             </button>
@@ -73,10 +73,11 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
               <button
                 onClick={() => onNavigate('/prototype')}
                 type="button"
-                className="inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 text-xs font-bold text-[#062B50] hover:text-[#0866C6] bg-white hover:bg-[#F4F8FD] border border-[#E8F3FF] rounded-xl transition-colors cursor-pointer shadow-xs focus-visible:outline-2 focus-visible:outline-[#0866C6]"
+                className="inline-flex items-center gap-1 min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 text-xs font-bold text-[#062B50] hover:text-[#0866C6] bg-white hover:bg-[#F4F8FD] border border-[#E8F3FF] rounded-xl transition-colors cursor-pointer shadow-xs focus-visible:outline-2 focus-visible:outline-[#0866C6] whitespace-nowrap"
                 title="View and take the 14 locked assessment questions"
               >
-                <span>Questions (14)</span>
+                <span className="hidden sm:inline">Questions (14)</span>
+                <span className="sm:hidden">14 Qs</span>
               </button>
 
               {/* Quick Demo Login CTA in Navbar */}
@@ -93,7 +94,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
               <button
                 onClick={() => onNavigate('/login')}
                 type="button"
-                className="min-h-[40px] sm:min-h-[44px] px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold text-white bg-[#0866C6] hover:bg-[#062B50] rounded-xl transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0866C6]"
+                className="min-h-[38px] sm:min-h-[44px] px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white bg-[#0866C6] hover:bg-[#062B50] rounded-xl transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0866C6] whitespace-nowrap"
               >
                 Sign in
               </button>
