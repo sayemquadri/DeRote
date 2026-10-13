@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Shield,
   Users,
@@ -27,12 +27,15 @@ import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import {
   getCurrentAdmin,
   signOutAdmin,
+  onAdminAuthChange,
   getAllStudentAdminRecords,
   calculateCohortAnalytics,
   StudentAdminRecord,
   AdminAccount,
 } from '../services/adminService';
 import { QUESTION_BANK, CUSTOM_OPTION_ID } from '../data/questionnaireBank';
+import { PrintReportModal } from '../components/PrintReportModal';
+import { exportCohortReportPdf, exportStudentReportPdf } from '../services/pdfExportService';
 
 interface AdminDashboardPageProps {
   onNavigate: (route: string) => void;
@@ -44,6 +47,33 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [classFilter, setClassFilter] = useState<'all' | '8' | '9' | '10'>('all');
   const [selectedStudent, setSelectedStudent] = useState<StudentAdminRecord | null>(null);
+
+  const [printModalConfig, setPrintModalConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle: string;
+    htmlContent: string;
+    plainTextSummary: string;
+    fileName: string;
+    onDownloadPdf?: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    subtitle: '',
+    htmlContent: '',
+    plainTextSummary: '',
+    fileName: '',
+  });
+
+  useEffect(() => {
+    const unsub = onAdminAuthChange((current) => {
+      setAdmin(current);
+      if (!current) {
+        onNavigate('/admin/login');
+      }
+    });
+    return () => unsub();
+  }, [onNavigate]);
 
   const studentRecords = useMemo(() => {
     return getAllStudentAdminRecords();
@@ -70,11 +100,194 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
   const handleSignOut = () => {
     signOutAdmin();
     setAdmin(null);
-    onNavigate('/login');
+    onNavigate('/admin/login');
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrintCohort = () => {
+    const institution = admin?.institution || 'DeRote Partner School Network';
+    const dateStr = new Date().toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+
+    const htmlContent = `
+      <div style="border-bottom: 2px solid #0866C6; padding-bottom: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;">
+          <div>
+            <h1 style="font-size: 22px; font-weight: 800; color: #062B50; margin: 0 0 4px 0;">DeRote — Cohort Insight & Learning Environment Summary</h1>
+            <p style="font-size: 13px; color: #465B72; margin: 0;">${institution} · Classes 8, 9, & 10 Cohort</p>
+          </div>
+          <div style="text-align: right; font-size: 11px; color: #64778C;">
+            <div>Academic Coordinator: <strong style="color: #062B50;">${admin?.fullName || 'School Coordinator'}</strong></div>
+            <div>Date: ${dateStr}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+        <div style="background: #F8FAFD; border: 1px solid #D5E9FF; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="font-size: 22px; font-weight: 800; color: #062B50;">${analytics.totalStudents}</div>
+          <div style="font-size: 10px; font-weight: 700; color: #64778C; text-transform: uppercase;">Total Students</div>
+        </div>
+        <div style="background: #F8FAFD; border: 1px solid #D5E9FF; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="font-size: 22px; font-weight: 800; color: #059669;">${analytics.completedAssessments}</div>
+          <div style="font-size: 10px; font-weight: 700; color: #059669; text-transform: uppercase;">Completed (${analytics.completionRate}%)</div>
+        </div>
+        <div style="background: #F8FAFD; border: 1px solid #D5E9FF; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="font-size: 22px; font-weight: 800; color: #0866C6;">${analytics.inProgressAssessments}</div>
+          <div style="font-size: 10px; font-weight: 700; color: #0866C6; text-transform: uppercase;">In Progress</div>
+        </div>
+        <div style="background: #F8FAFD; border: 1px solid #D5E9FF; border-radius: 12px; padding: 12px; text-align: center;">
+          <div style="font-size: 12px; font-weight: 700; color: #062B50;">C8: ${analytics.classBreakdown.class8} | C9: ${analytics.classBreakdown.class9}</div>
+          <div style="font-size: 12px; font-weight: 700; color: #062B50;">C10: ${analytics.classBreakdown.class10}</div>
+          <div style="font-size: 10px; font-weight: 700; color: #64778C; text-transform: uppercase;">Class Breakdown</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 13px; font-weight: 700; color: #062B50; margin: 0 0 8px 0; border-bottom: 1px solid #E8F3FF; padding-bottom: 4px;">Top Project Activities That Catch Interest</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          ${analytics.topDrawsInActivities.map(item => `
+            <div style="padding: 8px 12px; background: #F8FAFD; border-radius: 8px; border: 1px solid #E8F3FF; font-size: 12px; display: flex; justify-content: space-between;">
+              <span style="color: #062B50;">• ${item.label}</span>
+              <strong style="color: #0866C6;">${item.percentage}% (${item.count})</strong>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 13px; font-weight: 700; color: #062B50; margin: 0 0 8px 0; border-bottom: 1px solid #E8F3FF; padding-bottom: 4px;">What Helps Students Get Started (Starter Conditions)</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          ${analytics.topStarterConditions.map(item => `
+            <div style="padding: 8px 12px; background: #F8FAFD; border-radius: 8px; border: 1px solid #E8F3FF; font-size: 12px; display: flex; justify-content: space-between;">
+              <span style="color: #062B50;">• ${item.label}</span>
+              <strong style="color: #0866C6;">${item.percentage}% (${item.count})</strong>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 13px; font-weight: 700; color: #062B50; margin: 0 0 8px 0; border-bottom: 1px solid #E8F3FF; padding-bottom: 4px;">Student Submissions Roster Overview (${studentRecords.length} Students)</h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
+          <thead>
+            <tr style="background: #F4F8FD; border-bottom: 1px solid #D5E9FF;">
+              <th style="padding: 6px 8px; color: #062B50;">Student Name</th>
+              <th style="padding: 6px 8px; color: #062B50;">Grade</th>
+              <th style="padding: 6px 8px; color: #062B50;">Status</th>
+              <th style="padding: 6px 8px; color: #062B50;">Answered</th>
+              <th style="padding: 6px 8px; color: #062B50;">Primary Reflected Focus</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${studentRecords.map(s => `
+              <tr style="border-bottom: 1px solid #F0F5FA;">
+                <td style="padding: 6px 8px; font-weight: 600; color: #062B50;">${s.fullName}</td>
+                <td style="padding: 6px 8px; color: #465B72;">${s.classGrade}</td>
+                <td style="padding: 6px 8px; color: ${s.isSubmitted ? '#059669' : '#D97706'}; font-weight: 600;">${s.isSubmitted ? 'Completed' : 'Draft'}</td>
+                <td style="padding: 6px 8px; color: #465B72;">${s.answeredCount} / ${s.totalQuestions}</td>
+                <td style="padding: 6px 8px; color: #0866C6;">${s.insightReport.cards[0]?.heading || 'In Progress'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    const plainTextSummary = `DeRote — Cohort Insight & Learning Environment Summary
+Institution: ${institution}
+Coordinator: ${admin?.fullName || 'School Coordinator'}
+Date: ${dateStr}
+
+Summary Metrics:
+- Total Enrolled Students: ${analytics.totalStudents}
+- Completed Reflections: ${analytics.completedAssessments} (${analytics.completionRate}%)
+- In-Progress Drafts: ${analytics.inProgressAssessments}
+- Class Breakdown: Class 8: ${analytics.classBreakdown.class8}, Class 9: ${analytics.classBreakdown.class9}, Class 10: ${analytics.classBreakdown.class10}
+
+Top Project Draws:
+${analytics.topDrawsInActivities.map(i => `- ${i.label}: ${i.percentage}% (${i.count})`).join('\n')}
+
+Top Starter Conditions:
+${analytics.topStarterConditions.map(i => `- ${i.label}: ${i.percentage}% (${i.count})`).join('\n')}
+
+Student Submissions:
+${studentRecords.map(s => `- ${s.fullName} (${s.classGrade}): ${s.isSubmitted ? 'Completed' : 'Draft'}, Top Theme: ${s.insightReport.cards[0]?.heading || 'In Progress'}`).join('\n')}
+    `;
+
+    const cohortFileName = `derote-cohort-report-${new Date().toISOString().slice(0, 10)}`;
+    setPrintModalConfig({
+      isOpen: true,
+      title: 'Cohort Insight & Learning Environment Report',
+      subtitle: `${institution} · Classes 8–10 Overview`,
+      htmlContent,
+      plainTextSummary,
+      fileName: cohortFileName,
+      onDownloadPdf: () => exportCohortReportPdf(analytics, studentRecords, admin, cohortFileName),
+    });
+  };
+
+  const handlePrintStudent = (student: StudentAdminRecord) => {
+    const cardsHtml = student.insightReport.cards.map(card => `
+      <div style="background: #F8FAFD; border: 1px solid #D5E9FF; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+        <h4 style="font-size: 14px; font-weight: 700; color: #062B50; margin: 0 0 6px 0;">${card.heading}</h4>
+        <p style="font-size: 13px; color: #465B72; margin: 0 0 8px 0; line-height: 1.5;">${card.reflectionText}</p>
+        <div style="font-size: 11px; color: #0866C6; font-weight: 600;">
+          Traceable Evidence: ${card.evidence.map(e => `Q${e.questionNumber} (${e.questionTitle}): ${e.selectedOptionTexts.join(' / ')}`).join('; ')}
+        </div>
+      </div>
+    `).join('');
+
+    const htmlContent = `
+      <div style="border-bottom: 2px solid #0866C6; padding-bottom: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h1 style="font-size: 22px; font-weight: 800; color: #062B50; margin: 0 0 4px 0;">DeRote — Student Reflective Insight Record</h1>
+            <p style="font-size: 14px; font-weight: 600; color: #0866C6; margin: 0;">${student.fullName} · ${student.classGrade}</p>
+            <p style="font-size: 12px; color: #64778C; margin: 2px 0 0 0;">${student.schoolName}</p>
+          </div>
+          <div style="text-align: right; font-size: 11px; color: #64778C;">
+            <div>Status: <strong style="color: ${student.isSubmitted ? '#059669' : '#D97706'};">${student.isSubmitted ? 'Completed Assessment' : 'Working Draft'}</strong></div>
+            <div>Answered: ${student.answeredCount} / ${student.totalQuestions} Questions</div>
+            <div>Date: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 13px; font-weight: 700; color: #062B50; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.05em;">
+          Reflected Themes & Pedagogical Observations
+        </h3>
+        ${cardsHtml}
+      </div>
+
+      <div style="background: #F4F8FD; border-radius: 12px; padding: 12px; font-size: 11px; color: #465B72; border: 1px solid #E8F3FF;">
+        <strong>Philosophical Framing:</strong> "Reflect, don't judge." These insights reflect student-stated choices to support pedagogical guidance and collaborative conditions without personality labelling or numerical ranking.
+      </div>
+    `;
+
+    const plainTextSummary = `DeRote — Student Reflective Insight Record
+Student: ${student.fullName}
+Grade: ${student.classGrade}
+School: ${student.schoolName}
+Status: ${student.isSubmitted ? 'Completed' : 'Draft'} (${student.answeredCount}/${student.totalQuestions} answered)
+
+Reflected Themes:
+${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).join('\n\n')}
+    `;
+
+    const studentFileName = `derote-student-${student.fullName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}`;
+    setPrintModalConfig({
+      isOpen: true,
+      title: `Student Insight Record — ${student.fullName}`,
+      subtitle: `${student.classGrade} · ${student.schoolName}`,
+      htmlContent,
+      plainTextSummary,
+      fileName: studentFileName,
+      onDownloadPdf: () => exportStudentReportPdf(student.insightReport, student.schoolName, studentFileName),
+    });
   };
 
   return (
@@ -110,7 +323,7 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
 
             <button
               type="button"
-              onClick={handlePrint}
+              onClick={handlePrintCohort}
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#465B72] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-xl shadow-xs transition-colors cursor-pointer"
               title="Print Cohort Report"
             >
@@ -746,7 +959,17 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-[#F0F5FA] bg-[#FAFCFF] flex justify-end">
+            <div className="p-4 border-t border-[#F0F5FA] bg-[#FAFCFF] flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => handlePrintStudent(selectedStudent)}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-[#D5E9FF] text-[#062B50] hover:text-[#0866C6] font-bold text-xs hover:bg-[#F8FAFD] transition-colors shadow-xs cursor-pointer"
+                title="Print or export this student's insight report"
+              >
+                <Printer className="w-3.5 h-3.5 text-[#0866C6]" />
+                <span>Print Student Report</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setSelectedStudent(null)}
@@ -758,6 +981,18 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
           </div>
         </div>
       )}
+
+      {/* PRINT REPORT MODAL */}
+      <PrintReportModal
+        isOpen={printModalConfig.isOpen}
+        onClose={() => setPrintModalConfig((prev) => ({ ...prev, isOpen: false }))}
+        title={printModalConfig.title}
+        subtitle={printModalConfig.subtitle}
+        htmlContent={printModalConfig.htmlContent}
+        plainTextSummary={printModalConfig.plainTextSummary}
+        fileName={printModalConfig.fileName}
+        onDownloadPdf={printModalConfig.onDownloadPdf}
+      />
     </div>
   );
 }

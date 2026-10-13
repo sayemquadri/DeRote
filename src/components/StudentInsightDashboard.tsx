@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Compass,
   Lightbulb,
@@ -23,6 +23,8 @@ import {
 } from '../services/insightEngine';
 import { QuestionnaireSession } from '../services/questionnaireService';
 import { QUESTION_BANK, CUSTOM_OPTION_ID } from '../data/questionnaireBank';
+import { PrintReportModal } from './PrintReportModal';
+import { exportStudentReportPdf } from '../services/pdfExportService';
 
 interface StudentInsightDashboardProps {
   report: StudentInsightReport;
@@ -39,6 +41,7 @@ export function StudentInsightDashboard({
 }: StudentInsightDashboardProps) {
   const [showAllResponses, setShowAllResponses] = useState(false);
   const [expandedCardEvidence, setExpandedCardEvidence] = useState<Record<string, boolean>>({});
+  const [showPrintModal, setShowPrintModal] = useState(false);
 
   const toggleEvidence = (cardId: string) => {
     setExpandedCardEvidence((prev) => ({
@@ -47,8 +50,85 @@ export function StudentInsightDashboard({
     }));
   };
 
+  const htmlContent = useMemo(() => {
+    const cardsHtml = report.cards
+      .map(
+        (card) => `
+        <div style="background: #F8FAFD; border: 1px solid #D5E9FF; border-radius: 12px; padding: 16px; margin-bottom: 14px; page-break-inside: avoid;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #062B50; margin: 0 0 6px 0;">${card.heading}</h3>
+          <p style="font-size: 13px; color: #465B72; margin: 0 0 10px 0; line-height: 1.5;">${card.reflectionText}</p>
+          <div style="font-size: 11px; color: #0866C6; font-weight: 600;">
+            Traceable Question Evidence: ${card.evidence
+              .map(
+                (e) =>
+                  `Q${e.questionNumber} (${e.questionTitle}): ${e.selectedOptionTexts.join('; ')}`
+              )
+              .join(' | ')}
+          </div>
+        </div>
+      `
+      )
+      .join('');
+
+    return `
+      <div style="border-bottom: 2px solid #0866C6; padding-bottom: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <h1 style="font-size: 22px; font-weight: 800; color: #062B50; margin: 0 0 4px 0;">DeRote — Student Reflective Insight Snapshot</h1>
+            <p style="font-size: 14px; font-weight: 700; color: #0866C6; margin: 0;">${report.studentName} · ${report.classGrade}</p>
+          </div>
+          <div style="text-align: right; font-size: 11px; color: #64778C;">
+            <div>Submitted: ${
+              report.submittedAt
+                ? new Date(report.submittedAt).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : 'Recent'
+            }</div>
+            <div>Questions Answered: ${report.totalAnswered} / 14</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <div style="font-size: 11px; font-weight: 800; color: #0866C6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">YOUR INSIGHT</div>
+        <h2 style="font-size: 18px; font-weight: 800; color: #062B50; margin: 0 0 8px 0;">A little more about you.</h2>
+        <p style="font-size: 13px; color: #465B72; margin: 0 0 16px 0; line-height: 1.5;">Your answers offer a glimpse of what matters to you and how you approach different situations. They don't define everything you are.</p>
+
+        <div>
+          ${cardsHtml}
+        </div>
+      </div>
+
+      <div style="background: #F4F8FD; border-radius: 12px; padding: 12px; font-size: 11px; color: #465B72; border: 1px solid #E8F3FF; margin-top: 20px;">
+        <strong>Philosophical Framing:</strong> "Reflect, don't judge." Zero numerical scores, trait percentages, rankings, or personality archetypes.
+      </div>
+    `;
+  }, [report]);
+
+  const plainTextSummary = useMemo(() => {
+    return `DeRote — Student Reflective Insight Snapshot
+Student: ${report.studentName}
+Class / Grade: ${report.classGrade}
+Questions Answered: ${report.totalAnswered} / 14
+
+Reflected Themes:
+${report.cards
+  .map(
+    (c) => `* ${c.heading}
+${c.reflectionText}
+Evidence: ${c.evidence
+      .map((e) => `Q${e.questionNumber} (${e.questionTitle}): ${e.selectedOptionTexts.join(', ')}`)
+      .join('; ')}`
+  )
+  .join('\n\n')}
+    `;
+  }, [report]);
+
   const handlePrint = () => {
-    window.print();
+    setShowPrintModal(true);
   };
 
   // Icon mapping
@@ -349,6 +429,24 @@ export function StudentInsightDashboard({
           </button>
         </div>
       </div>
+
+      {/* PRINT & EXPORT MODAL */}
+      <PrintReportModal
+        isOpen={showPrintModal}
+        onClose={() => setShowPrintModal(false)}
+        title={`Student Reflective Insight Snapshot — ${report.studentName}`}
+        subtitle={`${report.classGrade} · DeRote Student Insight System`}
+        htmlContent={htmlContent}
+        plainTextSummary={plainTextSummary}
+        fileName={`derote-insight-${report.studentName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}`}
+        onDownloadPdf={() =>
+          exportStudentReportPdf(
+            report,
+            'DeRote Partner School',
+            `derote-insight-${report.studentName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().slice(0, 10)}`
+          )
+        }
+      />
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { SignupPage } from './pages/SignupPage';
 import { QuestionnairePage } from './pages/QuestionnairePage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
-import { getCurrentAdmin } from './services/adminService';
+import { getCurrentAdmin, onAdminAuthChange, AdminAccount } from './services/adminService';
 
 export default function App() {
   // Support both pathname and hash for robust routing across static and dev environments
@@ -44,6 +44,14 @@ export default function App() {
   };
 
   const [currentRoute, setCurrentRoute] = useState<string>(getInitialRoute);
+  const [currentAdmin, setCurrentAdmin] = useState<AdminAccount | null>(() => getCurrentAdmin());
+
+  useEffect(() => {
+    const unsub = onAdminAuthChange((admin) => {
+      setCurrentAdmin(admin);
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -117,12 +125,15 @@ export default function App() {
       {/* Route: Admin Dashboard or Admin Login */}
       {currentRoute === '/admin' && (
         <main className="flex-1 flex flex-col">
-          {getCurrentAdmin() ? (
+          {currentAdmin ? (
             <AdminDashboardPage onNavigate={navigateTo} />
           ) : (
             <AdminLoginPage
               onNavigate={navigateTo}
-              onAdminLoginSuccess={() => setCurrentRoute('/admin')}
+              onAdminLoginSuccess={() => {
+                setCurrentAdmin(getCurrentAdmin());
+                navigateTo('/admin');
+              }}
             />
           )}
         </main>
@@ -131,10 +142,17 @@ export default function App() {
       {/* Route: Explicit Admin Login */}
       {currentRoute === '/admin/login' && (
         <main className="flex-1 flex flex-col">
-          <AdminLoginPage
-            onNavigate={navigateTo}
-            onAdminLoginSuccess={() => setCurrentRoute('/admin')}
-          />
+          {currentAdmin ? (
+            <AdminDashboardPage onNavigate={navigateTo} />
+          ) : (
+            <AdminLoginPage
+              onNavigate={navigateTo}
+              onAdminLoginSuccess={() => {
+                setCurrentAdmin(getCurrentAdmin());
+                navigateTo('/admin');
+              }}
+            />
+          )}
         </main>
       )}
 

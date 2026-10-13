@@ -63,6 +63,61 @@ export const DEMO_ADMIN_ACCOUNT: AdminAccount = {
   isDemo: true,
 };
 
+export const ADMIN_AUTH_STATE_EVENT = 'derote_admin_auth_changed';
+
+/**
+ * Updates admin session in localStorage and broadcasts custom events
+ */
+export function setAdminSession(admin: AdminAccount | null): void {
+  try {
+    if (admin) {
+      localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(admin));
+    } else {
+      localStorage.removeItem(ADMIN_SESSION_KEY);
+    }
+  } catch (err) {
+    console.warn('Failed to update admin session in storage:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent(ADMIN_AUTH_STATE_EVENT, {
+        detail: { admin },
+      })
+    );
+  }
+}
+
+/**
+ * Subscribes to admin auth state changes
+ */
+export function onAdminAuthChange(callback: (admin: AdminAccount | null) => void): () => void {
+  callback(getCurrentAdmin());
+
+  const handler = (event: Event) => {
+    const custom = event as CustomEvent<{ admin: AdminAccount | null }>;
+    if (custom.detail !== undefined) {
+      callback(custom.detail.admin);
+    } else {
+      callback(getCurrentAdmin());
+    }
+  };
+
+  const storageHandler = (e: StorageEvent) => {
+    if (e.key === ADMIN_SESSION_KEY) {
+      callback(getCurrentAdmin());
+    }
+  };
+
+  window.addEventListener(ADMIN_AUTH_STATE_EVENT, handler);
+  window.addEventListener('storage', storageHandler);
+
+  return () => {
+    window.removeEventListener(ADMIN_AUTH_STATE_EVENT, handler);
+    window.removeEventListener('storage', storageHandler);
+  };
+}
+
 /**
  * Retrieves the currently logged in admin session
  */
@@ -84,7 +139,7 @@ export function loginAdmin(email: string, pass: string): { success: boolean; err
     (cleanEmail === 'admin@derote.in' || cleanEmail === 'rajesh.kulkarni@derote.in') &&
     pass === 'admin123'
   ) {
-    localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(DEMO_ADMIN_ACCOUNT));
+    setAdminSession(DEMO_ADMIN_ACCOUNT);
     return { success: true, admin: DEMO_ADMIN_ACCOUNT };
   }
 
@@ -98,7 +153,7 @@ export function loginAdmin(email: string, pass: string): { success: boolean; err
       email: cleanEmail,
       avatarText: 'SA',
     };
-    localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(customAdmin));
+    setAdminSession(customAdmin);
     return { success: true, admin: customAdmin };
   }
 
@@ -112,7 +167,7 @@ export function loginAdmin(email: string, pass: string): { success: boolean; err
  * 1-Click Instant Demo Admin Login
  */
 export function loginAsDemoAdmin(): AdminAccount {
-  localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(DEMO_ADMIN_ACCOUNT));
+  setAdminSession(DEMO_ADMIN_ACCOUNT);
   return DEMO_ADMIN_ACCOUNT;
 }
 
@@ -120,7 +175,7 @@ export function loginAsDemoAdmin(): AdminAccount {
  * Sign out admin
  */
 export function signOutAdmin(): void {
-  localStorage.removeItem(ADMIN_SESSION_KEY);
+  setAdminSession(null);
 }
 
 /**

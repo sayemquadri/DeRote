@@ -52,7 +52,7 @@ export function AdminLoginPage({
       } else {
         setErrorAlert(res.error || 'Authentication failed. Please verify credentials.');
       }
-    }, 300);
+    }, 150);
   };
 
   const handleDemoLogin = () => {
@@ -62,7 +62,13 @@ export function AdminLoginPage({
       setIsLoading(false);
       if (onAdminLoginSuccess) onAdminLoginSuccess();
       onNavigate('/admin');
-    }, 250);
+    }, 150);
+  };
+
+  const handleFillDemoCredentials = () => {
+    setEmail('admin@derote.in');
+    setPassword('admin123');
+    setErrorAlert(null);
   };
 
   return (
@@ -183,15 +189,21 @@ export function AdminLoginPage({
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D5E9FF] bg-white text-xs text-[#062B50] placeholder-[#64778C]/60 focus:outline-none focus:ring-2 focus:ring-[#0866C6]/30 focus:border-[#0866C6] transition-all"
                 />
               </div>
-              <span className="text-[10px] text-[#64778C] mt-1 block">
-                Demo user: admin@derote.in
-              </span>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#062B50] mb-1.5">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-[#062B50]">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={handleFillDemoCredentials}
+                  className="text-[11px] font-semibold text-[#0866C6] hover:text-[#062B50] hover:underline cursor-pointer"
+                >
+                  Auto-fill demo credentials
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#64778C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
@@ -202,9 +214,10 @@ export function AdminLoginPage({
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D5E9FF] bg-white text-xs text-[#062B50] placeholder-[#64778C]/60 focus:outline-none focus:ring-2 focus:ring-[#0866C6]/30 focus:border-[#0866C6] transition-all"
                 />
               </div>
-              <span className="text-[10px] text-[#64778C] mt-1 block">
-                Demo pass: admin123
-              </span>
+              <div className="flex items-center justify-between text-[10px] text-[#64778C] mt-1">
+                <span>Demo user: admin@derote.in</span>
+                <span>Demo pass: admin123</span>
+              </div>
             </div>
 
             <button

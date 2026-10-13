@@ -85,3 +85,29 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Document Print Styles */
+@media print {
+  header,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #FFFFFF !important;
+    color: #062B50 !important;
+    font-size: 11pt !important;
+  }
+
+  .print-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
