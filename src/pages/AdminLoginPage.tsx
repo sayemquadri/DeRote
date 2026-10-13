@@ -114,15 +114,15 @@ export function AdminLoginPage({
           <form onSubmit={handleCredentialsSubmit} className="space-y-4 text-left">
             <div>
               <label className="block text-xs font-bold text-[#062B50] mb-1.5">
-                Institutional Email
+                Institutional Email or Admin User ID
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-[#64778C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@derote.in"
+                  placeholder="admin@derote.in or Admin User ID"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D5E9FF] bg-white text-xs text-[#062B50] placeholder-[#64778C]/60 focus:outline-none focus:ring-2 focus:ring-[#0866C6]/30 focus:border-[#0866C6] transition-all"
                 />
               </div>

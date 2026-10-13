@@ -13,6 +13,12 @@ import { saveActiveStudentProfile, clearStudentSession, StudentProfile } from '.
 
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db, OperationType, handleFirestoreError } from './firebase';
+import {
+  PRIMARY_ADMIN_UID,
+  ADMIN_ACCOUNT,
+  setAdminSession,
+  isSuperAdminId,
+} from './adminService';
 
 export interface LocalStudentAccount {
   id: string;
@@ -203,7 +209,28 @@ export function registerLocalStudent(data: {
 export function loginLocalStudent(
   phone: string,
   pass: string
-): { success: boolean; error?: string; student?: LocalStudentAccount } {
+): { success: boolean; error?: string; student?: LocalStudentAccount; isAdmin?: boolean } {
+  // Check if logging in as Super Admin
+  if (isSuperAdminId(phone)) {
+    setAdminSession(ADMIN_ACCOUNT);
+    const adminAsStudent: LocalStudentAccount = {
+      id: PRIMARY_ADMIN_UID,
+      fullName: ADMIN_ACCOUNT.fullName,
+      classGrade: 'Admin',
+      schoolName: ADMIN_ACCOUNT.institution,
+      phone: PRIMARY_ADMIN_UID,
+      password: pass,
+      email: ADMIN_ACCOUNT.email,
+      completedReflections: 0,
+      totalReflections: 3,
+      badge: 'DeRote Administrator',
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
+    setActiveStudentSession(adminAsStudent);
+    return { success: true, student: adminAsStudent, isAdmin: true };
+  }
+
   const cleanPhone = normalizePhone(phone);
 
   // Check registered accounts in localStorage

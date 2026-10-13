@@ -19,8 +19,10 @@
 - **Update Protection**: Privacy requests can only be reviewed, updated, or resolved by administrators (`isAdmin()`).
 - **No Client Deletions**: Deletions are forbidden from client SDKs to maintain an immutable compliance audit log.
 
-### 1.4 Admin Accounts (`/admins/{adminId}`)
-- **Read & Write Restriction**: Only verified institutional admins (`exists(/databases/$(database)/documents/admins/$(request.auth.uid))` or bootstrapped admin `contact@derote.in`) can read or modify administrator records.
+### 1.4 Admin Accounts & Global Data Access (`/admins/{adminId}`, `/files/{fileId}`)
+- **Primary Admin UID (`HRmNP5WPw5fXtihxIVB2nkcCTkz1`)**: Designated master administrator. Granted global read access across all student profiles, sessions, privacy requests, and documents.
+- **Read & Write Restriction**: Only verified institutional admins (`request.auth.uid == 'HRmNP5WPw5fXtihxIVB2nkcCTkz1'`, `exists(/databases/$(database)/documents/admins/$(request.auth.uid))`, or bootstrapped admin `contact@derote.in`) can read or modify administrator records and files.
+- **User Lockdown**: All standard student accounts remain strictly locked down to their personal data only (`request.auth.uid == studentId`); blanket listing or cross-user reads are denied.
 
 ---
 

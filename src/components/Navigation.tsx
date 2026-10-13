@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { UserCheck } from 'lucide-react';
+import { UserCheck, Shield } from 'lucide-react';
 import { DeRoteWordmark } from './DeRoteWordmark';
 import {
   onLocalAuthChange,
   LocalStudentAccount,
 } from '../services/localAuth';
+import {
+  onAdminAuthChange,
+  AdminAccount,
+  PRIMARY_ADMIN_UID,
+} from '../services/adminService';
 
 interface NavigationProps {
   onNavigate: (route: string) => void;
@@ -13,13 +18,24 @@ interface NavigationProps {
 
 export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute = '/' }) => {
   const [activeStudent, setActiveStudent] = useState<LocalStudentAccount | null>(null);
+  const [currentAdmin, setCurrentAdmin] = useState<AdminAccount | null>(null);
 
   useEffect(() => {
-    const unsub = onLocalAuthChange((student) => {
+    const unsubStudent = onLocalAuthChange((student) => {
       setActiveStudent(student);
     });
-    return () => unsub();
+    const unsubAdmin = onAdminAuthChange((admin) => {
+      setCurrentAdmin(admin);
+    });
+    return () => {
+      unsubStudent();
+      unsubAdmin();
+    };
   }, []);
+
+  const isSuperAdmin =
+    currentAdmin?.id === PRIMARY_ADMIN_UID ||
+    activeStudent?.id === PRIMARY_ADMIN_UID;
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] transition-colors">
@@ -33,9 +49,19 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
           <DeRoteWordmark showDescriptor={true} size="md" />
         </button>
 
-        {/* Action Zone: Sign in or Active Student Status */}
+        {/* Action Zone: Sign in or Active Student / Admin Status */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-          {activeStudent ? (
+          {isSuperAdmin ? (
+            <button
+              onClick={() => onNavigate('/admin')}
+              type="button"
+              className="min-h-[38px] sm:min-h-[44px] px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#0866C6] cursor-pointer shadow-xs bg-[#062B50] text-white hover:bg-[#0866C6]"
+              title="Open DeRote Admin View"
+            >
+              <Shield className="w-4 h-4 text-[#42A5F5] shrink-0" />
+              <span>Admin View</span>
+            </button>
+          ) : activeStudent ? (
             <button
               onClick={() => onNavigate('/login')}
               type="button"

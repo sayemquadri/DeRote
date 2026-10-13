@@ -15,7 +15,21 @@ import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
 import { TermsOfUsePage } from './pages/TermsOfUsePage';
 import { ContactPrivacyPage } from './pages/ContactPrivacyPage';
 import { StudentConsentPage } from './pages/StudentConsentPage';
-import { getCurrentAdmin, onAdminAuthChange, AdminAccount } from './services/adminService';
+import {
+  getCurrentAdmin,
+  onAdminAuthChange,
+  AdminAccount,
+  PRIMARY_ADMIN_UID,
+  ADMIN_ACCOUNT,
+  setAdminSession,
+} from './services/adminService';
+import {
+  getCurrentActiveStudent,
+  onLocalAuthChange,
+  LocalStudentAccount,
+} from './services/localAuth';
+import { auth } from './services/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function App() {
   // Support both pathname and hash for robust routing across static and dev environments
@@ -43,13 +57,35 @@ export default function App() {
 
   const [currentRoute, setCurrentRoute] = useState<string>(getInitialRoute);
   const [currentAdmin, setCurrentAdmin] = useState<AdminAccount | null>(() => getCurrentAdmin());
+  const [activeStudent, setActiveStudent] = useState<LocalStudentAccount | null>(() => getCurrentActiveStudent());
+  const [firebaseUserUid, setFirebaseUserUid] = useState<string | null>(() => auth.currentUser?.uid || null);
 
   useEffect(() => {
-    const unsub = onAdminAuthChange((admin) => {
+    const unsubAdmin = onAdminAuthChange((admin) => {
       setCurrentAdmin(admin);
     });
-    return () => unsub();
+    const unsubStudent = onLocalAuthChange((student) => {
+      setActiveStudent(student);
+    });
+    const unsubFirebase = onAuthStateChanged(auth, (user) => {
+      const uid = user?.uid || null;
+      setFirebaseUserUid(uid);
+      if (uid === PRIMARY_ADMIN_UID) {
+        setAdminSession(ADMIN_ACCOUNT);
+      }
+    });
+    return () => {
+      unsubAdmin();
+      unsubStudent();
+      unsubFirebase();
+    };
   }, []);
+
+  // Determine if active user is the super administrator
+  const isSuperAdmin =
+    currentAdmin?.id === PRIMARY_ADMIN_UID ||
+    activeStudent?.id === PRIMARY_ADMIN_UID ||
+    firebaseUserUid === PRIMARY_ADMIN_UID;
 
   useEffect(() => {
     const handlePopState = () => {
@@ -119,10 +155,14 @@ export default function App() {
         </main>
       )}
 
-      {/* Route: Questionnaire Assessment Page */}
+      {/* Route: Questionnaire Assessment Page or Admin View for Super Admin */}
       {(currentRoute === '/prototype' || currentRoute === '/questionnaire') && (
         <main className="flex-1 flex flex-col">
-          <QuestionnairePage onNavigate={navigateTo} />
+          {isSuperAdmin ? (
+            <AdminDashboardPage onNavigate={navigateTo} />
+          ) : (
+            <QuestionnairePage onNavigate={navigateTo} />
+          )}
         </main>
       )}
 
@@ -157,7 +197,7 @@ export default function App() {
       {/* Route: Admin Dashboard or Admin Login */}
       {currentRoute === '/admin' && (
         <main className="flex-1 flex flex-col">
-          {currentAdmin ? (
+          {currentAdmin || isSuperAdmin ? (
             <AdminDashboardPage onNavigate={navigateTo} />
           ) : (
             <AdminLoginPage
@@ -174,7 +214,7 @@ export default function App() {
       {/* Route: Explicit Admin Login */}
       {currentRoute === '/admin/login' && (
         <main className="flex-1 flex flex-col">
-          {currentAdmin ? (
+          {currentAdmin || isSuperAdmin ? (
             <AdminDashboardPage onNavigate={navigateTo} />
           ) : (
             <AdminLoginPage

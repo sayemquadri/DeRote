@@ -32,6 +32,7 @@ import {
   signOutAdmin,
   onAdminAuthChange,
   getAllStudentAdminRecords,
+  fetchStudentAdminRecordsFromFirestore,
   calculateCohortAnalytics,
   StudentAdminRecord,
   AdminAccount,
@@ -39,6 +40,8 @@ import {
 import { QUESTION_BANK, CUSTOM_OPTION_ID } from '../data/questionnaireBank';
 import { PrintReportModal } from '../components/PrintReportModal';
 import { exportCohortReportPdf, exportStudentReportPdf } from '../services/pdfExportService';
+import { signOutLocalStudent } from '../services/localAuth';
+import { auth } from '../services/firebase';
 
 interface AdminDashboardPageProps {
   onNavigate: (route: string) => void;
@@ -79,8 +82,20 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
     return () => unsub();
   }, [onNavigate]);
 
-  const studentRecords = useMemo(() => {
-    return getAllStudentAdminRecords();
+  const [studentRecords, setStudentRecords] = useState<StudentAdminRecord[]>(() =>
+    getAllStudentAdminRecords()
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchStudentAdminRecordsFromFirestore().then((records) => {
+      if (isMounted && records && records.length > 0) {
+        setStudentRecords(records);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const analytics = useMemo(() => {
@@ -131,6 +146,12 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
 
   const handleSignOut = () => {
     signOutAdmin();
+    signOutLocalStudent();
+    try {
+      auth.signOut();
+    } catch {
+      // Ignore
+    }
     setAdmin(null);
     onNavigate('/admin/login');
   };
