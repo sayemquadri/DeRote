@@ -27,10 +27,12 @@ import {
   QuestionDefinition,
   CUSTOM_OPTION_ID,
 } from '../data/questionnaireBank';
+import { Modal } from '../components/Modal';
 import {
   loadQuestionnaireSession,
   persistQuestionnaireDraft,
   submitQuestionnaireResponses,
+  resetQuestionnaireSession,
   QuestionnaireSession,
   QuestionAnswerState,
   StudentProfile,
@@ -69,6 +71,7 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   const [submittedSuccessfully, setSubmittedSuccessfully] = useState<boolean>(false);
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
 
   // Initialize or fallback to Aarav Sharma demo if not logged in
   useEffect(() => {
@@ -262,16 +265,21 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   };
 
   const handleResetSession = () => {
-    if (window.confirm('Are you sure you want to restart your answers?')) {
-      if (student) {
-        localStorage.removeItem(`derote_questionnaire_draft_v1_${student.id}`);
-        loadQuestionnaireSession(student).then(({ session: freshSession }) => {
-          setSession(freshSession);
-          setCurrentIndex(0);
-          setSubmittedSuccessfully(false);
-        });
-      }
-    }
+    setShowResetConfirmModal(true);
+  };
+
+  const executeResetSession = async () => {
+    setShowResetConfirmModal(false);
+    setShowDrawer(false);
+    if (!student) return;
+
+    const freshSession = await resetQuestionnaireSession(student);
+    setSession(freshSession);
+    setCurrentIndex(0);
+    setSubmittedSuccessfully(false);
+    setShowCelebration(false);
+    setValidationAlert(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -647,6 +655,24 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
           </div>
         </div>
       )}
+      {/* Retake / Reset Questionnaire Confirmation Modal */}
+      <Modal
+        isOpen={showResetConfirmModal}
+        onClose={() => setShowResetConfirmModal(false)}
+        title="Retake Questionnaire"
+        badgeText="Fresh Reflection"
+        description="Are you sure you want to retake the questionnaire? This will clear your current answers and let you start fresh from Question 1."
+        actionText="Yes, Restart Questionnaire"
+        onAction={executeResetSession}
+        cancelText="Cancel"
+        onCancel={() => setShowResetConfirmModal(false)}
+      >
+        <div className="mt-3 p-3.5 rounded-xl bg-[#F4F8FD] border border-[#E8F3FF] text-xs text-[#465B72]">
+          <p>
+            Your responses will be cleared so you can take your time to reflect anew across all 14 questions without pressure.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 }

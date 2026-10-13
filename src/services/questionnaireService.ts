@@ -128,6 +128,41 @@ export const loadQuestionnaireSession = async (
   };
 };
 
+/**
+ * Resets the student's questionnaire session by clearing stored draft and creating a fresh session.
+ */
+export const resetQuestionnaireSession = async (
+  profile: StudentProfile
+): Promise<QuestionnaireSession> => {
+  const version = 'v1_classes_8_10';
+  const key = `${LOCAL_DRAFT_KEY}_${profile.id}`;
+
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage errors
+  }
+
+  const freshSession: QuestionnaireSession = {
+    sessionId: `local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    studentId: profile.id,
+    version,
+    status: 'draft',
+    currentQuestionIndex: 0,
+    answers: createDefaultAnswers(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  try {
+    localStorage.setItem(key, JSON.stringify(freshSession));
+  } catch {
+    // Ignore storage errors
+  }
+
+  return freshSession;
+};
+
 export const hasAnyAnswers = (answers: Record<string, QuestionAnswerState>): boolean => {
   return Object.values(answers).some(
     (a) => a.status === 'answered' || a.status === 'skipped'

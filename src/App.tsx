@@ -9,6 +9,9 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { QuestionnairePage } from './pages/QuestionnairePage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { getCurrentAdmin } from './services/adminService';
 
 export default function App() {
   // Support both pathname and hash for robust routing across static and dev environments
@@ -20,6 +23,12 @@ export default function App() {
     }
     if (path === '/login' || hash === '#/login' || hash === '#login') {
       return '/login';
+    }
+    if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
+      return '/admin';
+    }
+    if (path === '/admin/login' || hash === '#/admin/login' || hash === '#admin/login') {
+      return '/admin/login';
     }
     if (
       path === '/prototype' ||
@@ -44,6 +53,10 @@ export default function App() {
         setCurrentRoute('/signup');
       } else if (path === '/login' || hash === '#/login' || hash === '#login') {
         setCurrentRoute('/login');
+      } else if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
+        setCurrentRoute('/admin');
+      } else if (path === '/admin/login' || hash === '#/admin/login' || hash === '#admin/login') {
+        setCurrentRoute('/admin/login');
       } else if (
         path === '/prototype' ||
         hash === '#/prototype' ||
@@ -101,11 +114,37 @@ export default function App() {
         </main>
       )}
 
+      {/* Route: Admin Dashboard or Admin Login */}
+      {currentRoute === '/admin' && (
+        <main className="flex-1 flex flex-col">
+          {getCurrentAdmin() ? (
+            <AdminDashboardPage onNavigate={navigateTo} />
+          ) : (
+            <AdminLoginPage
+              onNavigate={navigateTo}
+              onAdminLoginSuccess={() => setCurrentRoute('/admin')}
+            />
+          )}
+        </main>
+      )}
+
+      {/* Route: Explicit Admin Login */}
+      {currentRoute === '/admin/login' && (
+        <main className="flex-1 flex flex-col">
+          <AdminLoginPage
+            onNavigate={navigateTo}
+            onAdminLoginSuccess={() => setCurrentRoute('/admin')}
+          />
+        </main>
+      )}
+
       {/* Route: Landing Page (Default & Fallback for any other route) */}
       {currentRoute !== '/login' &&
         currentRoute !== '/signup' &&
         currentRoute !== '/prototype' &&
-        currentRoute !== '/questionnaire' && (
+        currentRoute !== '/questionnaire' &&
+        currentRoute !== '/admin' &&
+        currentRoute !== '/admin/login' && (
           <>
             <Navigation onNavigate={navigateTo} currentRoute="/" />
             <main className="flex-1">

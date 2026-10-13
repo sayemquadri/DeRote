@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Compass, ShieldCheck, ExternalLink, Sparkles } from 'lucide-react';
+import { ArrowRight, Compass, ShieldCheck, ExternalLink, Sparkles, Shield } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { HeroVisual } from '../components/HeroVisual';
 import { FlowingBlueRibbons } from '../components/FlowingBlueRibbons';
@@ -281,8 +281,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
             <span className="text-[#64778C]/40 hidden sm:inline" aria-hidden="true">·</span>
 
+            <button
+              type="button"
+              onClick={() => onNavigate('/admin')}
+              className="inline-flex items-center gap-1.5 text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 py-1 rounded-lg shadow-xs transition-colors cursor-pointer font-bold"
+            >
+              <Shield className="w-3.5 h-3.5 text-[#0866C6]" />
+              <span>Administrator / HOD Portal</span>
+            </button>
+
+            <span className="text-[#64778C]/40 hidden sm:inline" aria-hidden="true">·</span>
+
             <span className="text-[#64778C]">
-              Institutional Privacy & Student Support (Contact your school administrator)
+              Institutional Privacy & Student Support
             </span>
           </div>
         </div>

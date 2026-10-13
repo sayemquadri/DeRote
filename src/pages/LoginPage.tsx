@@ -16,6 +16,7 @@ import {
   Award,
   ChevronRight,
   RefreshCw,
+  Shield,
 } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { Modal } from '../components/Modal';
@@ -511,6 +512,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
           <div className="mt-6 text-center text-xs text-[#64778C] flex items-center justify-center gap-1.5">
             <Lock className="w-3.5 h-3.5 shrink-0 text-[#0866C6]" />
             <span>School-approved privacy and student participation safeguards</span>
+          </div>
+
+          {/* Admin / Educator link at footer */}
+          <div className="mt-4 pt-4 border-t border-[#E8F3FF] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#64778C]">
+            <span>School Principal, HOD, or Counselor?</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/admin')}
+              className="inline-flex items-center gap-1.5 font-bold text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-[#0866C6]" />
+              <span>Administrator / HOD Portal</span>
+            </button>
           </div>
         </div>
       </main>

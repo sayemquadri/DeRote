@@ -88,6 +88,15 @@ export function StudentInsightDashboard({
         <div className="flex items-center gap-2">
           <button
             type="button"
+            onClick={onRetake}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#64778C] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-lg shadow-xs transition-colors cursor-pointer"
+            title="Retake Questionnaire"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#0866C6]" />
+            <span>Retake Assessment</span>
+          </button>
+          <button
+            type="button"
             onClick={handlePrint}
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#465B72] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-lg shadow-xs transition-colors cursor-pointer"
             title="Save or Print Snapshot"
