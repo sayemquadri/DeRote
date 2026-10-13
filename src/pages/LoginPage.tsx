@@ -21,7 +21,6 @@ import {
   LocalStudentAccount,
   isValidIndianMobile,
 } from '../services/localAuth';
-import { loginAdmin, isSuperAdminId } from '../services/adminService';
 
 interface LoginPageProps {
   onNavigate: (route: string) => void;
@@ -58,8 +57,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   }, []);
 
   // Sign out handler
-  const handleSignOut = () => {
-    signOutLocalStudent();
+  const handleSignOut = async () => {
+    await signOutLocalStudent();
     setActiveStudent(null);
     setFormAlert({
       type: 'info',
@@ -67,10 +66,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     });
   };
 
-  // Real-time input handling for phone number or Admin ID
+  // Clean real-time input handling for Indian phone number
   const handleMobileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    setMobileNumber(raw);
+    const filtered = raw.replace(/[^\d\s\-]/g, '');
+    setMobileNumber(filtered);
     if (mobileError) setMobileError(null);
     if (formAlert) setFormAlert(null);
   };
@@ -87,14 +87,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     let hasErrors = false;
     setFormAlert(null);
 
-    const isTargetAdmin = isSuperAdminId(mobileNumber);
-
-    // Validate identifier
+    // Validate mobile number
     if (!mobileNumber.trim()) {
-      setMobileError('Please enter your mobile number or Admin User ID.');
+      setMobileError('Please enter your mobile number.');
       hasErrors = true;
-    } else if (!isTargetAdmin && !isValidIndianMobile(mobileNumber)) {
-      setMobileError('Please enter a valid 10-digit Indian mobile number or Admin ID.');
+    } else if (!isValidIndianMobile(mobileNumber)) {
+      setMobileError('Please enter a valid 10-digit Indian mobile number.');
       hasErrors = true;
     } else {
       setMobileError(null);
@@ -115,43 +113,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     setIsLoading(true);
 
     try {
-      // Check if Admin User ID is logging in
-      if (isTargetAdmin) {
-        const adminRes = loginAdmin(mobileNumber, password);
-        if (adminRes.success) {
-          setFormAlert({
-            type: 'success',
-            message: 'Signed in as Administrator! Opening Admin View...',
-          });
-          setTimeout(() => {
-            onNavigate('/admin');
-          }, 350);
-          return;
-        } else {
-          setFormAlert({
-            type: 'error',
-            message: adminRes.error || 'Invalid administrator credentials.',
-          });
-          return;
-        }
-      }
-
-      // Standard Student Login
-      const result = loginLocalStudent(mobileNumber, password);
+      const result = await loginLocalStudent(mobileNumber, password);
 
       if (!result.success) {
         setFormAlert({
           type: 'error',
           message: result.error || 'Invalid mobile number or password.',
         });
-      } else if (result.isAdmin) {
-        setFormAlert({
-          type: 'success',
-          message: 'Signed in as Administrator! Opening Admin View...',
-        });
-        setTimeout(() => {
-          onNavigate('/admin');
-        }, 350);
       } else {
         setFormAlert({
           type: 'success',
@@ -164,7 +132,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     } catch {
       setFormAlert({
         type: 'error',
-        message: 'A local authentication error occurred. Please try again.',
+        message: 'An authentication error occurred. Please check your network connection and try again.',
       });
     } finally {
       setIsLoading(false);
@@ -315,25 +283,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                   htmlFor="login-mobileNumber"
                   className="block text-xs sm:text-sm font-bold text-[#062B50] mb-1.5"
                 >
-                  10-Digit Mobile Number or Admin ID <span className="text-red-500">*</span>
+                  10-Digit Mobile Number <span className="text-red-500">*</span>
                 </label>
                 <div className="relative flex items-center">
-                  {!mobileNumber.match(/[a-zA-Z]/) && (
-                    <span className="absolute left-3.5 text-sm font-bold text-[#64778C] select-none">
-                      +91
-                    </span>
-                  )}
+                  <span className="absolute left-3.5 text-sm font-bold text-[#64778C] select-none">
+                    +91
+                  </span>
                   <input
                     id="login-mobileNumber"
-                    type="text"
+                    type="tel"
                     value={mobileNumber}
                     onChange={handleMobileChange}
-                    maxLength={40}
-                    placeholder="XXXXXXXXXX"
+                    maxLength={10}
+                    placeholder="9876543210"
                     disabled={isLoading}
-                    className={`w-full min-h-[48px] ${
-                      !mobileNumber.match(/[a-zA-Z]/) ? 'pl-13 pr-3.5' : 'px-3.5'
-                    } rounded-xl border border-[#062B50]/15 focus:border-[#0866C6] focus:ring-2 focus:ring-[#0866C6]/20 outline-none text-sm sm:text-base text-[#102C46] tracking-wide`}
+                    className="w-full min-h-[48px] pl-13 pr-3.5 rounded-xl border border-[#062B50]/15 focus:border-[#0866C6] focus:ring-2 focus:ring-[#0866C6]/20 outline-none text-sm sm:text-base text-[#102C46] tracking-wide"
                   />
                 </div>
                 {mobileError && (

@@ -1,47 +1,47 @@
 /**
- * Local Student Authentication Service for DeRote Student Insight System
+ * Student Authentication & Profile Service for DeRote Student Insight System
  *
- * Runs 100% in-browser using localStorage without external backend dependencies
- * (no Supabase, no Firebase). Provides:
- * - Persistent student registration
- * - Indian phone number + password login
- * - Demo account login & roster
- * - Synchronized auth state across tabs and components
+ * Connected directly to Firebase Authentication & Cloud Firestore:
+ * - Genuine Firebase Authentication (Email/Password with student credentials)
+ * - Automatic session persistence and restoration across refreshes
+ * - Student profile records persisted in Cloud Firestore (/students/{uid})
+ * - Strict student-level ownership enforced by Firestore Security Rules
  */
 
-import { saveActiveStudentProfile, clearStudentSession, StudentProfile } from './questionnaireService';
-
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
-import { db, OperationType, handleFirestoreError } from './firebase';
 import {
-  PRIMARY_ADMIN_UID,
-  ADMIN_ACCOUNT,
-  setAdminSession,
-  isSuperAdminId,
-} from './adminService';
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { auth, db } from './firebase';
+import {
+  saveActiveStudentProfile,
+  clearStudentSession,
+  StudentProfile,
+} from './questionnaireService';
 
 export interface LocalStudentAccount {
-  id: string;
+  id: string; // Firebase UID
   fullName: string;
   classGrade: string;
   schoolName: string;
   phone: string;
-  password?: string;
   email?: string;
   completedReflections?: number;
   totalReflections?: number;
   badge?: string;
-  isDemo?: boolean;
   createdAt: string;
   lastLoginAt: string;
 }
 
-const REGISTERED_ACCOUNTS_KEY = 'derote_registered_accounts_v1';
-const ACTIVE_USER_SESSION_KEY = 'derote_active_user_session_v1';
-const AUTH_STATE_EVENT = 'derote_local_auth_changed';
+const ACTIVE_USER_SESSION_KEY = 'derote_active_student_session_v1';
+const AUTH_STATE_EVENT = 'derote_student_auth_changed';
 
 /**
- * Normalizes Indian mobile number to last 10 digits
+ * Normalizes Indian mobile number to 10 digits
  */
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^\d]/g, '');
@@ -54,60 +54,15 @@ export function isValidIndianMobile(raw: string): boolean {
 }
 
 /**
- * Student roster
+ * Derives the unique authentication email used in Firebase Auth for a student's mobile number.
  */
-export const DEMO_STUDENT_ROSTER: LocalStudentAccount[] = [];
-
-/**
- * Syncs student account to Firestore
- */
-export async function syncStudentToFirestore(account: LocalStudentAccount): Promise<void> {
-  const path = `students/${account.id}`;
-  try {
-    await setDoc(doc(db, 'students', account.id), {
-      id: account.id,
-      fullName: account.fullName,
-      classGrade: account.classGrade,
-      schoolName: account.schoolName,
-      phone: account.phone,
-      email: account.email || `${account.phone}@student.derote.in`,
-      completedReflections: account.completedReflections || 0,
-      totalReflections: account.totalReflections || 3,
-      badge: account.badge || `Class ${account.classGrade} Student`,
-      createdAt: account.createdAt,
-      lastLoginAt: account.lastLoginAt,
-    });
-  } catch (err) {
-    console.warn(`Firestore sync warning for ${path}:`, err);
-  }
+export function getStudentAuthEmail(phone: string): string {
+  const cleanPhone = normalizePhone(phone);
+  return `${cleanPhone}@student.derote.in`;
 }
 
 /**
- * Retrieves all registered accounts saved in browser localStorage
- */
-export function getStoredAccounts(): LocalStudentAccount[] {
-  try {
-    const raw = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as LocalStudentAccount[];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Saves all registered accounts in browser localStorage
- */
-function saveStoredAccounts(accounts: LocalStudentAccount[]): void {
-  try {
-    localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(accounts));
-  } catch (err) {
-    console.warn('Failed to store account in localStorage:', err);
-  }
-}
-
-/**
- * Gets currently active session student
+ * Gets currently active session student from cache
  */
 export function getCurrentActiveStudent(): LocalStudentAccount | null {
   try {
@@ -120,7 +75,7 @@ export function getCurrentActiveStudent(): LocalStudentAccount | null {
 }
 
 /**
- * Sets current active session student and fires change events
+ * Sets current active session student in cache and broadcasts events
  */
 export function setActiveStudentSession(student: LocalStudentAccount | null): void {
   try {
@@ -139,7 +94,7 @@ export function setActiveStudentSession(student: LocalStudentAccount | null): vo
       clearStudentSession();
     }
   } catch (err) {
-    console.warn('Failed to save session:', err);
+    console.warn('Failed to update student session storage:', err);
   }
 
   if (typeof window !== 'undefined') {
@@ -152,129 +107,279 @@ export function setActiveStudentSession(student: LocalStudentAccount | null): vo
 }
 
 /**
- * Registers a new student locally & syncs to Firestore
+ * Genuine Firebase Authentication: Register Student Account
  */
-export function registerLocalStudent(data: {
+export async function registerLocalStudent(data: {
   fullName: string;
   classGrade: string;
   schoolName: string;
   phone: string;
-  password?: string;
+  password: string;
   email?: string;
-}): { success: boolean; error?: string; student?: LocalStudentAccount } {
+}): Promise<{ success: boolean; error?: string; student?: LocalStudentAccount }> {
   const cleanPhone = normalizePhone(data.phone);
 
   if (!isValidIndianMobile(cleanPhone)) {
     return { success: false, error: 'Please enter a valid 10-digit Indian mobile number.' };
   }
 
-  const existing = getStoredAccounts();
-  const duplicate = existing.find((a) => a.phone === cleanPhone);
-  if (duplicate) {
+  if (!data.password || data.password.length < 6) {
+    return { success: false, error: 'Password must be at least 6 characters long.' };
+  }
+
+  const authEmail = data.email && data.email.includes('@') ? data.email.trim().toLowerCase() : getStudentAuthEmail(cleanPhone);
+
+  try {
+    // 1. Create real Firebase Authentication account
+    const userCredential = await createUserWithEmailAndPassword(auth, authEmail, data.password);
+    const uid = userCredential.user.uid;
+
+    // 2. Persist genuine student profile in Cloud Firestore (/students/{uid})
+    const now = new Date().toISOString();
+    const newAccount: LocalStudentAccount = {
+      id: uid,
+      fullName: data.fullName.trim(),
+      classGrade: data.classGrade.trim(),
+      schoolName: data.schoolName.trim(),
+      phone: cleanPhone,
+      email: authEmail,
+      completedReflections: 0,
+      totalReflections: 14,
+      badge: `Class ${data.classGrade.trim()} Student`,
+      createdAt: now,
+      lastLoginAt: now,
+    };
+
+    await setDoc(doc(db, 'students', uid), {
+      id: uid,
+      fullName: newAccount.fullName,
+      classGrade: newAccount.classGrade,
+      schoolName: newAccount.schoolName,
+      phone: newAccount.phone,
+      email: newAccount.email,
+      createdAt: now,
+      lastLoginAt: now,
+      completedReflections: 0,
+      totalReflections: 14,
+      badge: newAccount.badge,
+    });
+
+    setActiveStudentSession(newAccount);
+    return { success: true, student: newAccount };
+  } catch (err: unknown) {
+    const error = err as { code?: string; message?: string };
+    console.error('Firebase Student Registration Error:', error);
+
+    if (error.code === 'auth/email-already-in-use') {
+      return {
+        success: false,
+        error: 'An account with this mobile number already exists. Please sign in.',
+      };
+    }
+    if (error.code === 'auth/weak-password') {
+      return {
+        success: false,
+        error: 'Password is too weak. Please use at least 6 characters.',
+      };
+    }
+    if (error.code === 'auth/network-request-failed') {
+      return {
+        success: false,
+        error: 'Network connection failed. Please check your internet connection.',
+      };
+    }
+
     return {
       success: false,
-      error: 'An account with this mobile number already exists. Please sign in.',
+      error: error.message || 'Unable to create account in Firebase. Please try again.',
     };
   }
-
-  const newAccount: LocalStudentAccount = {
-    id: `student_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-    fullName: data.fullName.trim(),
-    classGrade: data.classGrade.trim(),
-    schoolName: data.schoolName.trim(),
-    phone: cleanPhone,
-    password: data.password || 'password123',
-    email: data.email || `${cleanPhone}@student.derote.in`,
-    completedReflections: 0,
-    totalReflections: 3,
-    badge: `Class ${data.classGrade} Student`,
-    isDemo: false,
-    createdAt: new Date().toISOString(),
-    lastLoginAt: new Date().toISOString(),
-  };
-
-  existing.push(newAccount);
-  saveStoredAccounts(existing);
-  setActiveStudentSession(newAccount);
-
-  // Sync to Firestore
-  syncStudentToFirestore(newAccount);
-
-  return { success: true, student: newAccount };
 }
 
 /**
- * Signs in student using phone & password (checking registered accounts)
+ * Genuine Firebase Authentication: Sign in Student Account
  */
-export function loginLocalStudent(
+export async function loginLocalStudent(
   phone: string,
   pass: string
-): { success: boolean; error?: string; student?: LocalStudentAccount; isAdmin?: boolean } {
-  // Check if logging in as Super Admin
-  if (isSuperAdminId(phone)) {
-    setAdminSession(ADMIN_ACCOUNT);
-    const adminAsStudent: LocalStudentAccount = {
-      id: PRIMARY_ADMIN_UID,
-      fullName: ADMIN_ACCOUNT.fullName,
-      classGrade: 'Admin',
-      schoolName: ADMIN_ACCOUNT.institution,
-      phone: PRIMARY_ADMIN_UID,
-      password: pass,
-      email: ADMIN_ACCOUNT.email,
-      completedReflections: 0,
-      totalReflections: 3,
-      badge: 'DeRote Administrator',
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-    setActiveStudentSession(adminAsStudent);
-    return { success: true, student: adminAsStudent, isAdmin: true };
-  }
-
+): Promise<{ success: boolean; error?: string; student?: LocalStudentAccount }> {
   const cleanPhone = normalizePhone(phone);
 
-  // Check registered accounts in localStorage
-  const accounts = getStoredAccounts();
-  const match = accounts.find((a) => a.phone === cleanPhone && a.password === pass);
-  if (match) {
-    match.lastLoginAt = new Date().toISOString();
-    saveStoredAccounts(accounts);
-    setActiveStudentSession(match);
-    syncStudentToFirestore(match);
-    return { success: true, student: match };
+  if (!isValidIndianMobile(cleanPhone)) {
+    return { success: false, error: 'Please enter a valid 10-digit Indian mobile number.' };
   }
 
-  // Provide helpful feedback if phone exists but password wrong
-  const phoneExists = accounts.some((a) => a.phone === cleanPhone);
-  if (phoneExists) {
-    return { success: false, error: 'Incorrect password for this mobile number.' };
+  if (!pass) {
+    return { success: false, error: 'Please enter your password.' };
   }
 
-  return {
-    success: false,
-    error: 'No account found with this mobile number. Please check your number or create a new account.',
-  };
+  const authEmail = getStudentAuthEmail(cleanPhone);
+
+  try {
+    // 1. Authenticate against Firebase Authentication
+    const userCredential = await signInWithEmailAndPassword(auth, authEmail, pass);
+    const uid = userCredential.user.uid;
+
+    // 2. Fetch student profile from Cloud Firestore (/students/{uid})
+    const docRef = doc(db, 'students', uid);
+    const docSnap = await getDoc(docRef);
+
+    let studentData: LocalStudentAccount;
+
+    if (docSnap.exists()) {
+      const remote = docSnap.data() as Partial<LocalStudentAccount>;
+      studentData = {
+        id: uid,
+        fullName: remote.fullName || 'Student',
+        classGrade: remote.classGrade || '10',
+        schoolName: remote.schoolName || 'School',
+        phone: remote.phone || cleanPhone,
+        email: remote.email || authEmail,
+        completedReflections: remote.completedReflections || 0,
+        totalReflections: remote.totalReflections || 14,
+        badge: remote.badge || `Class ${remote.classGrade || '10'} Student`,
+        createdAt: remote.createdAt || new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+
+      // Update lastLoginAt in Firestore
+      try {
+        await updateDoc(docRef, { lastLoginAt: studentData.lastLoginAt });
+      } catch {
+        // Non-fatal if update timestamp fails
+      }
+    } else {
+      // If Firestore profile document doesn't exist yet, construct from auth metadata
+      studentData = {
+        id: uid,
+        fullName: 'Student',
+        classGrade: '10',
+        schoolName: 'Enrolled School',
+        phone: cleanPhone,
+        email: authEmail,
+        completedReflections: 0,
+        totalReflections: 14,
+        badge: 'Class 10 Student',
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+
+      try {
+        await setDoc(docRef, studentData);
+      } catch (err) {
+        console.warn('Could not backfill student doc in Firestore:', err);
+      }
+    }
+
+    setActiveStudentSession(studentData);
+    return { success: true, student: studentData };
+  } catch (err: unknown) {
+    const error = err as { code?: string; message?: string };
+    console.error('Firebase Student Sign In Error:', error);
+
+    if (
+      error.code === 'auth/invalid-credential' ||
+      error.code === 'auth/user-not-found' ||
+      error.code === 'auth/wrong-password'
+    ) {
+      return {
+        success: false,
+        error: 'Invalid mobile number or password. Please verify your credentials or register a new profile.',
+      };
+    }
+    if (error.code === 'auth/too-many-requests') {
+      return {
+        success: false,
+        error: 'Access temporarily disabled due to multiple failed login attempts. Please try again later.',
+      };
+    }
+    if (error.code === 'auth/network-request-failed') {
+      return {
+        success: false,
+        error: 'Network connection failed. Please check your internet connection.',
+      };
+    }
+
+    return {
+      success: false,
+      error: error.message || 'Authentication error. Please check your connection and try again.',
+    };
+  }
 }
 
 /**
- * Fallback helper for legacy compatibility
+ * Genuine Firebase Sign Out
  */
-export function loginAsDemoStudent(_studentId?: string): LocalStudentAccount | null {
-  return null;
+export async function signOutLocalStudent(): Promise<void> {
+  try {
+    await signOut(auth);
+  } catch (err) {
+    console.warn('Firebase sign out warning:', err);
+  } finally {
+    setActiveStudentSession(null);
+  }
 }
 
 /**
- * Signs out current student
+ * Listen for Firebase Auth state changes & restore genuine sessions
  */
-export function signOutLocalStudent(): void {
-  setActiveStudentSession(null);
+let isListenerInitialized = false;
+
+function initAuthListener(): void {
+  if (isListenerInitialized) return;
+  isListenerInitialized = true;
+
+  onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+    if (!firebaseUser) {
+      // If signed out or no user, clear session if currently set as student
+      const current = getCurrentActiveStudent();
+      if (current) {
+        setActiveStudentSession(null);
+      }
+      return;
+    }
+
+    // Check if the authenticated user is an administrator
+    if (firebaseUser.email === 'contact@derote.in') {
+      return;
+    }
+
+    // Attempt to restore student profile from Cloud Firestore (/students/{uid})
+    try {
+      const docRef = doc(db, 'students', firebaseUser.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data() as Partial<LocalStudentAccount>;
+        const student: LocalStudentAccount = {
+          id: firebaseUser.uid,
+          fullName: data.fullName || 'Student',
+          classGrade: data.classGrade || '10',
+          schoolName: data.schoolName || 'School',
+          phone: data.phone || '',
+          email: firebaseUser.email || data.email,
+          completedReflections: data.completedReflections || 0,
+          totalReflections: data.totalReflections || 14,
+          badge: data.badge,
+          createdAt: data.createdAt || new Date().toISOString(),
+          lastLoginAt: data.lastLoginAt || new Date().toISOString(),
+        };
+        setActiveStudentSession(student);
+      }
+    } catch (err) {
+      console.warn('Failed to restore student from Firestore on auth change:', err);
+    }
+  });
 }
 
+// Initialize listener immediately
+initAuthListener();
+
 /**
- * Listen for auth state changes
+ * Listen for student auth state changes in components
  */
 export function onLocalAuthChange(callback: (student: LocalStudentAccount | null) => void): () => void {
-  // Initial fire
+  // Fire immediately with current cached student
   callback(getCurrentActiveStudent());
 
   const handler = (event: Event) => {

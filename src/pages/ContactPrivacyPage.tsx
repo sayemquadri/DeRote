@@ -61,11 +61,12 @@ export const ContactPrivacyPage: React.FC<ContactPrivacyPageProps> = ({ onNaviga
         status: 'pending',
         createdAt: new Date().toISOString(),
       });
+      setSubmitted(true);
     } catch (err) {
-      console.warn('Firestore privacy request sync notice:', err);
+      console.error('Firestore privacy request submission error:', err);
+      setFormError('Failed to record your privacy request in Firebase. Please check your network connection and try again.');
     } finally {
       setIsSubmitting(false);
-      setSubmitted(true);
     }
   };
 

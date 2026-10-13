@@ -24,7 +24,7 @@ export function AdminLoginPage({
   const [errorAlert, setErrorAlert] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorAlert(null);
 
@@ -34,16 +34,19 @@ export function AdminLoginPage({
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      const res = loginAdmin(email, password);
-      setIsLoading(false);
+    try {
+      const res = await loginAdmin(email, password);
       if (res.success) {
         if (onAdminLoginSuccess) onAdminLoginSuccess();
         onNavigate('/admin');
       } else {
         setErrorAlert(res.error || 'Authentication failed. Please verify credentials.');
       }
-    }, 150);
+    } catch {
+      setErrorAlert('A network or server error occurred during administrator authentication.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

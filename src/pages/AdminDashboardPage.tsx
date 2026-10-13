@@ -25,14 +25,16 @@ import {
   Building2,
   MapPin,
   School,
+  Loader2,
+  RefreshCw,
+  AlertCircle,
 } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import {
   getCurrentAdmin,
   signOutAdmin,
   onAdminAuthChange,
-  getAllStudentAdminRecords,
-  fetchStudentAdminRecordsFromFirestore,
+  fetchAllStudentAdminRecords,
   calculateCohortAnalytics,
   StudentAdminRecord,
   AdminAccount,
@@ -40,8 +42,6 @@ import {
 import { QUESTION_BANK, CUSTOM_OPTION_ID } from '../data/questionnaireBank';
 import { PrintReportModal } from '../components/PrintReportModal';
 import { exportCohortReportPdf, exportStudentReportPdf } from '../services/pdfExportService';
-import { signOutLocalStudent } from '../services/localAuth';
-import { auth } from '../services/firebase';
 
 interface AdminDashboardPageProps {
   onNavigate: (route: string) => void;
@@ -82,20 +82,26 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
     return () => unsub();
   }, [onNavigate]);
 
-  const [studentRecords, setStudentRecords] = useState<StudentAdminRecord[]>(() =>
-    getAllStudentAdminRecords()
-  );
+  const [studentRecords, setStudentRecords] = useState<StudentAdminRecord[]>([]);
+  const [isLoadingRecords, setIsLoadingRecords] = useState<boolean>(true);
+  const [recordsError, setRecordsError] = useState<string | null>(null);
+
+  const loadRecords = async () => {
+    setIsLoadingRecords(true);
+    setRecordsError(null);
+    try {
+      const records = await fetchAllStudentAdminRecords();
+      setStudentRecords(records);
+    } catch (err) {
+      console.error('Failed to load student records from Firestore:', err);
+      setRecordsError('Unable to load student records from Cloud Firestore. Please verify your administrator credentials.');
+    } finally {
+      setIsLoadingRecords(false);
+    }
+  };
 
   useEffect(() => {
-    let isMounted = true;
-    fetchStudentAdminRecordsFromFirestore().then((records) => {
-      if (isMounted && records && records.length > 0) {
-        setStudentRecords(records);
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
+    loadRecords();
   }, []);
 
   const analytics = useMemo(() => {
@@ -144,14 +150,8 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
     });
   }, [studentRecords, searchQuery, classFilter, schoolFilter]);
 
-  const handleSignOut = () => {
-    signOutAdmin();
-    signOutLocalStudent();
-    try {
-      auth.signOut();
-    } catch {
-      // Ignore
-    }
+  const handleSignOut = async () => {
+    await signOutAdmin();
     setAdmin(null);
     onNavigate('/admin/login');
   };
@@ -377,6 +377,17 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
 
             <button
               type="button"
+              onClick={loadRecords}
+              disabled={isLoadingRecords}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#465B72] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+              title="Refresh records from Cloud Firestore"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-[#0866C6] ${isLoadingRecords ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+
+            <button
+              type="button"
               onClick={handlePrintCohort}
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-[#465B72] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-3 py-1.5 rounded-xl shadow-xs transition-colors cursor-pointer"
               title="Print Cohort Report"
@@ -469,6 +480,30 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
           </div>
         </div>
 
+        {/* Cloud Firestore Loading & Error Notifications */}
+        {isLoadingRecords && (
+          <div className="bg-white p-4 rounded-2xl border border-[#D5E9FF] shadow-xs flex items-center justify-center gap-3 text-xs text-[#0866C6]">
+            <Loader2 className="w-4 h-4 animate-spin text-[#0866C6]" />
+            <span className="font-semibold">Loading student submissions from Cloud Firestore...</span>
+          </div>
+        )}
+
+        {recordsError && (
+          <div className="bg-red-50 p-4 rounded-2xl border border-red-200 shadow-xs flex items-center justify-between gap-3 text-xs text-red-700">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
+              <span>{recordsError}</span>
+            </div>
+            <button
+              type="button"
+              onClick={loadRecords}
+              className="px-3 py-1 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shrink-0 cursor-pointer"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Top 4 KPI Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white p-5 rounded-2xl border border-[#E8F3FF] shadow-xs">
@@ -557,23 +592,37 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
               </div>
             </div>
 
-            {/* 4 Environmental Theme Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Category A: What Draws Students In */}
-              <div className="bg-white p-6 rounded-3xl border border-[#E8F3FF] shadow-xs">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-xl bg-[#F0F7FF] flex items-center justify-center text-[#0866C6]">
-                    <Compass className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-[#062B50]">
-                      What Draws Students In
-                    </h3>
-                    <p className="text-[11px] text-[#64778C]">
-                      Most appealing activities chosen for year-end exhibition
-                    </p>
-                  </div>
+            {/* 4 Environmental Theme Grid or Empty State */}
+            {studentRecords.length === 0 ? (
+              <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#E8F3FF] shadow-xs text-center flex flex-col items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-[#E8F3FF] text-[#0866C6] flex items-center justify-center mb-3">
+                  <BarChart3 className="w-6 h-6" />
                 </div>
+                <h3 className="text-base font-bold text-[#062B50]">
+                  No Student Reflections Recorded in Firestore Yet
+                </h3>
+                <p className="text-xs text-[#64778C] mt-2 max-w-md mx-auto leading-relaxed">
+                  As students register and submit their reflections through the student portal, cohort themes (such as exhibition choices, starter conditions, and collaboration instincts) will populate here in real time.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Category A: What Draws Students In */}
+                  <div className="bg-white p-6 rounded-3xl border border-[#E8F3FF] shadow-xs">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 rounded-xl bg-[#F0F7FF] flex items-center justify-center text-[#0866C6]">
+                        <Compass className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-[#062B50]">
+                          What Draws Students In
+                        </h3>
+                        <p className="text-[11px] text-[#64778C]">
+                          Most appealing activities chosen for year-end exhibition
+                        </p>
+                      </div>
+                    </div>
 
                 <div className="space-y-3">
                   {analytics.topDrawsInActivities.map((item, idx) => (
@@ -763,8 +812,10 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                 ))}
               </div>
             </div>
-          </div>
+          </>
         )}
+      </div>
+    )}
 
         {/* TAB 2: STUDENT SUBMISSIONS ROSTER */}
         {activeTab === 'roster' && (
@@ -912,7 +963,15 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                 );
               })}
 
-              {filteredRecords.length === 0 && (
+              {studentRecords.length === 0 ? (
+                <div className="py-12 px-4 text-center text-xs text-[#64778C] space-y-2">
+                  <div className="w-10 h-10 rounded-2xl bg-[#E8F3FF] text-[#0866C6] flex items-center justify-center mx-auto mb-2">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <p className="font-bold text-sm text-[#062B50]">No Student Submissions in Firestore Yet</p>
+                  <p className="max-w-md mx-auto leading-relaxed">There are currently no student records in Cloud Firestore. As students register and complete assessments, their profiles will appear here.</p>
+                </div>
+              ) : filteredRecords.length === 0 ? (
                 <div className="py-10 px-4 text-center text-xs text-[#64778C] space-y-2">
                   <p>No student records found matching the current filters.</p>
                   <button
@@ -927,7 +986,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                     Reset all filters
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
 
             {/* Desktop View: Full Data Table */}
@@ -997,7 +1056,15 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                 </tbody>
               </table>
 
-              {filteredRecords.length === 0 && (
+              {studentRecords.length === 0 ? (
+                <div className="py-16 text-center text-xs text-[#64778C] space-y-2">
+                  <div className="w-10 h-10 rounded-2xl bg-[#E8F3FF] text-[#0866C6] flex items-center justify-center mx-auto mb-2">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <p className="font-bold text-sm text-[#062B50]">No Student Records in Cloud Firestore Yet</p>
+                  <p className="max-w-md mx-auto leading-relaxed">There are currently no student records in Cloud Firestore. As students register and complete assessments, their profiles will appear here.</p>
+                </div>
+              ) : filteredRecords.length === 0 ? (
                 <div className="py-12 text-center text-xs text-[#64778C] space-y-2">
                   <p>No student records found matching the current filters.</p>
                   <button
@@ -1012,7 +1079,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                     Reset all filters
                   </button>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         )}
