@@ -11,6 +11,10 @@ import { SignupPage } from './pages/SignupPage';
 import { QuestionnairePage } from './pages/QuestionnairePage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+import { TermsOfUsePage } from './pages/TermsOfUsePage';
+import { ContactPrivacyPage } from './pages/ContactPrivacyPage';
+import { StudentConsentPage } from './pages/StudentConsentPage';
 import { getCurrentAdmin, onAdminAuthChange, AdminAccount } from './services/adminService';
 
 export default function App() {
@@ -18,25 +22,19 @@ export default function App() {
   const getInitialRoute = (): string => {
     const path = window.location.pathname;
     const hash = window.location.hash;
-    if (path === '/signup' || hash === '#/signup' || hash === '#signup') {
-      return '/signup';
-    }
-    if (path === '/login' || hash === '#/login' || hash === '#login') {
-      return '/login';
-    }
-    if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
-      return '/admin';
-    }
-    if (path === '/admin/login' || hash === '#/admin/login' || hash === '#admin/login') {
-      return '/admin/login';
-    }
+    const matchRoute = (r: string) => path === r || hash === `#${r}` || hash === `#/${r.replace(/^\//, '')}`;
+
+    if (matchRoute('/signup')) return '/signup';
+    if (matchRoute('/login')) return '/login';
+    if (matchRoute('/admin')) return '/admin';
+    if (matchRoute('/admin/login')) return '/admin/login';
+    if (matchRoute('/privacy')) return '/privacy';
+    if (matchRoute('/terms')) return '/terms';
+    if (matchRoute('/contact-privacy')) return '/contact-privacy';
+    if (matchRoute('/consent')) return '/consent';
     if (
-      path === '/prototype' ||
-      hash === '#/prototype' ||
-      hash === '#prototype' ||
-      path === '/questionnaire' ||
-      hash === '#/questionnaire' ||
-      hash === '#questionnaire'
+      matchRoute('/prototype') ||
+      matchRoute('/questionnaire')
     ) {
       return '/prototype';
     }
@@ -57,21 +55,27 @@ export default function App() {
     const handlePopState = () => {
       const path = window.location.pathname;
       const hash = window.location.hash;
-      if (path === '/signup' || hash === '#/signup' || hash === '#signup') {
+      const matchRoute = (r: string) => path === r || hash === `#${r}` || hash === `#/${r.replace(/^\//, '')}`;
+
+      if (matchRoute('/signup')) {
         setCurrentRoute('/signup');
-      } else if (path === '/login' || hash === '#/login' || hash === '#login') {
+      } else if (matchRoute('/login')) {
         setCurrentRoute('/login');
-      } else if (path === '/admin' || hash === '#/admin' || hash === '#admin') {
+      } else if (matchRoute('/admin')) {
         setCurrentRoute('/admin');
-      } else if (path === '/admin/login' || hash === '#/admin/login' || hash === '#admin/login') {
+      } else if (matchRoute('/admin/login')) {
         setCurrentRoute('/admin/login');
+      } else if (matchRoute('/privacy')) {
+        setCurrentRoute('/privacy');
+      } else if (matchRoute('/terms')) {
+        setCurrentRoute('/terms');
+      } else if (matchRoute('/contact-privacy')) {
+        setCurrentRoute('/contact-privacy');
+      } else if (matchRoute('/consent')) {
+        setCurrentRoute('/consent');
       } else if (
-        path === '/prototype' ||
-        hash === '#/prototype' ||
-        hash === '#prototype' ||
-        path === '/questionnaire' ||
-        hash === '#/questionnaire' ||
-        hash === '#questionnaire'
+        matchRoute('/prototype') ||
+        matchRoute('/questionnaire')
       ) {
         setCurrentRoute('/prototype');
       } else {
@@ -108,7 +112,7 @@ export default function App() {
         </main>
       )}
 
-      {/* Route: Signup Page (Account Creation) */}
+      {/* Route: Signup Page (Account Creation & Consent) */}
       {currentRoute === '/signup' && (
         <main className="flex-1 flex flex-col">
           <SignupPage onNavigate={navigateTo} />
@@ -119,6 +123,34 @@ export default function App() {
       {(currentRoute === '/prototype' || currentRoute === '/questionnaire') && (
         <main className="flex-1 flex flex-col">
           <QuestionnairePage onNavigate={navigateTo} />
+        </main>
+      )}
+
+      {/* Route: Student Privacy & Consent Information Page */}
+      {currentRoute === '/consent' && (
+        <main className="flex-1 flex flex-col">
+          <StudentConsentPage onNavigate={navigateTo} />
+        </main>
+      )}
+
+      {/* Route: Privacy Policy */}
+      {currentRoute === '/privacy' && (
+        <main className="flex-1 flex flex-col">
+          <PrivacyPolicyPage onNavigate={navigateTo} />
+        </main>
+      )}
+
+      {/* Route: Terms of Use */}
+      {currentRoute === '/terms' && (
+        <main className="flex-1 flex flex-col">
+          <TermsOfUsePage onNavigate={navigateTo} />
+        </main>
+      )}
+
+      {/* Route: Contact & Privacy Requests */}
+      {currentRoute === '/contact-privacy' && (
+        <main className="flex-1 flex flex-col">
+          <ContactPrivacyPage onNavigate={navigateTo} />
         </main>
       )}
 
@@ -156,11 +188,15 @@ export default function App() {
         </main>
       )}
 
-      {/* Route: Landing Page (Default & Fallback for any other route) */}
+      {/* Route: Landing Page (Default & Fallback for root / other routes) */}
       {currentRoute !== '/login' &&
         currentRoute !== '/signup' &&
         currentRoute !== '/prototype' &&
         currentRoute !== '/questionnaire' &&
+        currentRoute !== '/consent' &&
+        currentRoute !== '/privacy' &&
+        currentRoute !== '/terms' &&
+        currentRoute !== '/contact-privacy' &&
         currentRoute !== '/admin' &&
         currentRoute !== '/admin/login' && (
           <>

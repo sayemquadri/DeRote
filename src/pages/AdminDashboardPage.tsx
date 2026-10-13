@@ -1055,6 +1055,46 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
         )}
       </main>
 
+      {/* Admin Dashboard Legal Footer */}
+      <footer className="border-t border-[#E8F3FF] bg-white py-4 px-4 sm:px-8 mt-auto">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs text-[#64778C] gap-3">
+          <span>DeRote Student Insight System · Authorized HOD &amp; Admin Dashboard</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onNavigate('/consent')}
+              className="hover:underline text-[#0866C6] cursor-pointer"
+            >
+              Consent Notice
+            </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/privacy')}
+              className="hover:underline text-[#0866C6] cursor-pointer"
+            >
+              Privacy Policy
+            </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/terms')}
+              className="hover:underline text-[#0866C6] cursor-pointer"
+            >
+              Terms of Use
+            </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/contact-privacy')}
+              className="hover:underline text-[#0866C6] cursor-pointer"
+            >
+              Privacy Requests
+            </button>
+          </div>
+        </div>
+      </footer>
+
       {/* STUDENT DETAIL MODAL */}
       {selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">

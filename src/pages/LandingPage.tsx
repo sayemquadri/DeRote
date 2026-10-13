@@ -4,6 +4,7 @@ import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { HeroVisual } from '../components/HeroVisual';
 import { FlowingBlueRibbons } from '../components/FlowingBlueRibbons';
 import { loginAsDemoStudent } from '../services/localAuth';
+import { Footer } from '../components/Footer';
 import blueWaveArt from '../assets/images/derote_blue_wave_art_1791725706302.jpg';
 import bluePrismArt from '../assets/images/derote_blue_prism_art_1791725743880.jpg';
 
@@ -253,58 +254,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* =========================================================================
-          SIMPLE, ELEGANT FOOTER
-          Clean white and navy branding, official website link, privacy readiness
-          ========================================================================= */}
-      <footer className="mt-auto border-t border-[#E8F3FF] bg-[#F4F8FD] px-4 sm:px-6 lg:px-8 py-10">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center md:items-start justify-between gap-6 text-center md:text-left">
-          {/* Brand & mission statement */}
-          <div className="space-y-2 max-w-sm">
-            <DeRoteWordmark showDescriptor={false} size="sm" />
-            <p className="text-xs text-[#64778C] leading-relaxed">
-              DeRote Student Insight System empowers school students to explore preferences, motivations, and choices.
-            </p>
-          </div>
-
-          {/* Links & Institutional readiness */}
-          <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-7 text-xs font-medium text-[#64778C]">
-            <a
-              href="https://derote.in/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[#062B50] hover:text-[#0866C6] transition-colors focus-visible:outline-2 focus-visible:outline-[#0866C6] rounded font-bold"
-            >
-              <span>About DeRote</span>
-              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
-            </a>
-
-            <span className="text-[#64778C]/40 hidden sm:inline" aria-hidden="true">·</span>
-
-            <button
-              type="button"
-              onClick={() => onNavigate('/admin')}
-              className="inline-flex items-center gap-1.5 text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 py-1 rounded-lg shadow-xs transition-colors cursor-pointer font-bold"
-            >
-              <Shield className="w-3.5 h-3.5 text-[#0866C6]" />
-              <span>Administrator / HOD Portal</span>
-            </button>
-
-            <span className="text-[#64778C]/40 hidden sm:inline" aria-hidden="true">·</span>
-
-            <span className="text-[#64778C]">
-              Institutional Privacy & Student Support
-            </span>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-[#E8F3FF] flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#64778C]">
-          <span>© {new Date().getFullYear()} DeRote. All rights reserved.</span>
-          <span className="mt-2 sm:mt-0 text-[#64778C]">
-            Designed for students in Classes 5–12 · Blue & White Edition
-          </span>
-        </div>
-      </footer>
+      {/* Unified DeRote Footer with Legal & Privacy Links */}
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

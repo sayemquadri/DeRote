@@ -230,17 +230,50 @@ export function AdminLoginPage({
             </button>
           </form>
 
-          {/* Institutional Note */}
+          {/* Operational Note */}
           <div className="mt-6 pt-4 border-t border-[#F0F5FA] flex items-center justify-center gap-2 text-[11px] text-[#64778C]">
             <Building2 className="w-3.5 h-3.5 text-[#0866C6]" />
-            <span>Dedicated for School Principals, HODs, & Counselors</span>
+            <span>DeRote Academic Leadership &amp; Department Heads (HODs)</span>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#E8F3FF] bg-white py-4 text-center text-xs text-[#64778C]">
-        <span>DeRote Institutional Insight System · Administrator Secure Zone</span>
+      <footer className="border-t border-[#E8F3FF] bg-white py-4 px-4 flex flex-col sm:flex-row items-center justify-between text-xs text-[#64778C] max-w-6xl mx-auto w-full gap-2">
+        <span>DeRote Student Insight System · Authorized Administrator Access</span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onNavigate('/consent')}
+            className="hover:underline text-[#0866C6] cursor-pointer"
+          >
+            Consent Notice
+          </button>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => onNavigate('/privacy')}
+            className="hover:underline text-[#0866C6] cursor-pointer"
+          >
+            Privacy Policy
+          </button>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => onNavigate('/terms')}
+            className="hover:underline text-[#0866C6] cursor-pointer"
+          >
+            Terms of Use
+          </button>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => onNavigate('/contact-privacy')}
+            className="hover:underline text-[#0866C6] cursor-pointer"
+          >
+            Privacy Requests
+          </button>
+        </div>
       </footer>
     </div>
   );

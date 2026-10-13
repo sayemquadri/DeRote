@@ -519,12 +519,47 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
           {/* Privacy Note */}
           <div className="mt-6 text-center text-xs text-[#64778C] flex items-center justify-center gap-1.5">
             <Lock className="w-3.5 h-3.5 shrink-0 text-[#0866C6]" />
-            <span>School-approved privacy and student participation safeguards</span>
+            <span>Directly Managed by DeRote · Educational Self-Reflection</span>
+          </div>
+
+          {/* Legal Links */}
+          <div className="mt-3 text-center text-xs text-[#64778C] flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => onNavigate('/consent')}
+              className="hover:underline text-[#0866C6]"
+            >
+              Consent Notice
+            </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/privacy')}
+              className="hover:underline text-[#0866C6]"
+            >
+              Privacy Policy
+            </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/terms')}
+              className="hover:underline text-[#0866C6]"
+            >
+              Terms of Use
+            </button>
+            <span>·</span>
+            <button
+              type="button"
+              onClick={() => onNavigate('/contact-privacy')}
+              className="hover:underline text-[#0866C6]"
+            >
+              Privacy Requests
+            </button>
           </div>
 
           {/* Admin / Educator link at footer */}
           <div className="mt-4 pt-4 border-t border-[#E8F3FF] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#64778C]">
-            <span>School Principal, HOD, or Counselor?</span>
+            <span>DeRote Administrator or HOD?</span>
             <button
               type="button"
               onClick={() => onNavigate('/admin')}
@@ -542,8 +577,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
         isOpen={showForgotPasswordModal}
         onClose={() => setShowForgotPasswordModal(false)}
         title="Reset Student Password"
-        badgeText="School Assistance"
-        description="For student safety and privacy, passwords can be reset directly through your school’s DeRote administrator or class teacher. If you are exploring the system, use the 1-Click Demo Login above (Aarav, Ananya, or Rohan with password 'demo123')."
+        badgeText="DeRote Support"
+        description="For student privacy, passwords can be reset directly through an authorized DeRote administrator or mentor. If you are exploring the system, use the 1-Click Demo Login above (Aarav, Ananya, or Rohan with password 'demo123')."
         actionText="Back to sign in"
         onAction={() => setShowForgotPasswordModal(false)}
       />
