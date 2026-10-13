@@ -1,12 +1,11 @@
 import React from 'react';
-import { ArrowRight, Compass, ShieldCheck, ExternalLink, Sparkles, Shield } from 'lucide-react';
-import { DeRoteWordmark } from '../components/DeRoteWordmark';
-import { HeroVisual } from '../components/HeroVisual';
+import { ArrowRight, Compass, ShieldCheck, Sparkles } from 'lucide-react';
 import { FlowingBlueRibbons } from '../components/FlowingBlueRibbons';
 import { loginAsDemoStudent } from '../services/localAuth';
 import { Footer } from '../components/Footer';
-import blueWaveArt from '../assets/images/derote_blue_wave_art_1791725706302.jpg';
-import bluePrismArt from '../assets/images/derote_blue_prism_art_1791725743880.jpg';
+import step2Art from '../assets/images/22.png';
+import step1Art from '../assets/images/1.png';
+import step3Art from '../assets/images/3.png';
 
 interface LandingPageProps {
   onNavigate: (route: string) => void;
@@ -35,81 +34,71 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
         {/* =========================================================================
             HERO SECTION
-            Deliberate two-column composition on desktop, vertical mobile-first at 390px
+            Clean, centered layout with the visual artwork section removed
             ========================================================================= */}
-        <section className="relative z-10 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-12 lg:pt-16 pb-12 sm:pb-20">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-              {/* Left Column: Hero Copy & Actions */}
-              <div className="lg:col-span-7 flex flex-col items-start text-left">
-                {/* Eyebrow Pill */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F3FF] border border-[#168FE5]/20 mb-3.5 sm:mb-4 select-none">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0866C6]" aria-hidden="true" />
-                  <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-[#0866C6]">
-                    A DeRote Experience
-                  </span>
-                  <span className="text-[#64778C]/40" aria-hidden="true">·</span>
-                  <span className="text-[11px] sm:text-xs font-semibold text-[#64778C]">
-                    Classes 5–12
-                  </span>
-                </div>
+        <section className="relative z-10 px-4 sm:px-6 lg:px-8 pt-8 sm:pt-14 lg:pt-18 pb-12 sm:pb-20">
+          <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+            {/* Eyebrow Pill */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E8F3FF] border border-[#168FE5]/20 mb-3.5 sm:mb-4 select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0866C6]" aria-hidden="true" />
+              <span className="text-[11px] sm:text-xs font-bold tracking-wider uppercase text-[#0866C6]">
+                A DeRote Experience
+              </span>
+              <span className="text-[#64778C]/40" aria-hidden="true">·</span>
+              <span className="text-[11px] sm:text-xs font-semibold text-[#64778C]">
+                Classes 8–10
+              </span>
+            </div>
 
-                {/* Main Headline */}
-                <h1 className="text-[32px] sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#062B50] leading-[1.12] mb-4 sm:mb-6 text-balance">
-                  There's more to you than a report card.
-                </h1>
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#062B50] leading-[1.14] mb-4 sm:mb-6 text-balance max-w-3xl">
+              There's more to you than a report card.
+            </h1>
 
-                {/* Supporting Text */}
-                <p className="text-base sm:text-lg lg:text-xl text-[#64778C] leading-relaxed mb-7 sm:mb-8 max-w-xl">
-                  A little space to explore what matters to you, how you approach things, and the possibilities you haven't discovered yet.
-                </p>
+            {/* Supporting Text */}
+            <p className="text-base sm:text-lg lg:text-xl text-[#64778C] leading-relaxed mb-7 sm:mb-8 max-w-2xl">
+              A little space to explore what matters to you, how you approach things, and the possibilities you haven't discovered yet.
+            </p>
 
-                {/* Primary CTA (-> /signup) & Secondary CTA (-> /login) */}
-                <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 mb-5">
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('/signup')}
-                    className="w-full sm:w-auto min-h-[50px] sm:min-h-[54px] px-7 py-3 rounded-2xl bg-[#0866C6] text-white font-bold text-base sm:text-lg hover:bg-[#062B50] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2.5 shadow-md shadow-[#0866C6]/25 focus-visible:outline-2 focus-visible:outline-[#0866C6] cursor-pointer"
-                  >
-                    <span>Begin your journey</span>
-                    <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
-                  </button>
+            {/* Primary CTA (-> /signup) & Secondary CTA (-> /login) */}
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3.5 sm:gap-4 mb-5">
+              <button
+                type="button"
+                onClick={() => onNavigate('/signup')}
+                className="w-full sm:w-auto min-h-[50px] sm:min-h-[54px] px-8 py-3.5 rounded-2xl bg-[#0866C6] text-white font-bold text-base sm:text-lg hover:bg-[#062B50] active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2.5 shadow-md shadow-[#0866C6]/25 focus-visible:outline-2 focus-visible:outline-[#0866C6] cursor-pointer"
+              >
+                <span>Begin your journey</span>
+                <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
+              </button>
 
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('/login')}
-                    className="w-full sm:w-auto min-h-[48px] px-5 py-2.5 rounded-2xl text-sm sm:text-base font-bold text-[#062B50] hover:text-[#0866C6] hover:bg-[#F4F8FD] active:bg-[#E8F3FF] transition-colors flex items-center justify-center text-center cursor-pointer border border-[#E8F3FF]"
-                  >
-                    Already have an account? Sign in
-                  </button>
-                </div>
+              <button
+                type="button"
+                onClick={() => onNavigate('/login')}
+                className="w-full sm:w-auto min-h-[48px] px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold text-[#062B50] hover:text-[#0866C6] hover:bg-[#F4F8FD] active:bg-[#E8F3FF] transition-colors flex items-center justify-center text-center cursor-pointer border border-[#E8F3FF]"
+              >
+                Already have an account? Sign in
+              </button>
+            </div>
 
-                {/* 1-Click Demo Quick Access Pill */}
-                <div className="mb-5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      loginAsDemoStudent('demo_aarav_10');
-                      onNavigate('/questionnaire');
-                    }}
-                    className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0866C6] hover:text-[#062B50] bg-[#E8F3FF] hover:bg-[#168FE5]/20 border border-[#168FE5]/30 rounded-xl px-3.5 py-2 transition-all cursor-pointer shadow-xs focus-visible:outline-2 focus-visible:outline-[#0866C6]"
-                  >
-                    <Sparkles className="w-4 h-4 text-[#0866C6]" />
-                    <span>Try 1-Click Demo Student (Aarav • Class 10)</span>
-                  </button>
-                </div>
+            {/* 1-Click Demo Quick Access Pill */}
+            <div className="mb-5">
+              <button
+                type="button"
+                onClick={() => {
+                  loginAsDemoStudent('demo_aarav_10');
+                  onNavigate('/questionnaire');
+                }}
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0866C6] hover:text-[#062B50] bg-[#E8F3FF] hover:bg-[#168FE5]/20 border border-[#168FE5]/30 rounded-xl px-4 py-2 transition-all cursor-pointer shadow-xs focus-visible:outline-2 focus-visible:outline-[#0866C6]"
+              >
+                <Sparkles className="w-4 h-4 text-[#0866C6]" />
+                <span>Try 1-Click Demo Student (Aarav • Class 10)</span>
+              </button>
+            </div>
 
-                {/* Reassurance Trust Signal */}
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-[#64778C]">
-                  <ShieldCheck className="w-4 h-4 text-[#0866C6] shrink-0" />
-                  <span>Reflective & non-evaluative · Designed for mobile access</span>
-                </div>
-              </div>
-
-              {/* Right Column: Sophisticated Blue & White Abstract Sculpture with Floating Shapes */}
-              <div className="lg:col-span-5 w-full mt-4 lg:mt-0">
-                <HeroVisual className="w-full" />
-              </div>
+            {/* Reassurance Trust Signal */}
+            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-[#64778C]">
+              <ShieldCheck className="w-4 h-4 text-[#0866C6] shrink-0" />
+              <span>Reflective & non-evaluative · Designed for mobile access</span>
             </div>
           </div>
         </section>
@@ -161,8 +150,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div>
                 <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-white mb-5 border border-[#E8F3FF]">
                   <img
-                    src={blueWaveArt}
-                    alt="Glossy blue fluid sculpted wave representing reflection"
+                    src={step1Art}
+                    alt="Reflect - Explore your thoughts and preferences"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                     referrerPolicy="no-referrer"
@@ -190,8 +179,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div>
                 <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-white mb-5 border border-[#E8F3FF]">
                   <img
-                    src={bluePrismArt}
-                    alt="Architectural translucent glass arches and blue ribbon representing discovery"
+                    src={step2Art}
+                    alt="Discover - Notice different ways of approaching situations"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                     referrerPolicy="no-referrer"
@@ -217,11 +206,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             {/* Card 3: IMAGINE */}
             <div className="bg-[#F4F8FD] rounded-3xl p-6 sm:p-7 border border-[#E8F3FF] shadow-xs hover:shadow-md hover:border-[#168FE5]/30 transition-all flex flex-col justify-between group">
               <div>
-                <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br from-[#062B50] to-[#0866C6] mb-5 border border-[#E8F3FF] flex items-center justify-center p-6 relative">
-                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-                  <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <Sparkles className="w-10 h-10 text-white" aria-hidden="true" />
-                  </div>
+                <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-white mb-5 border border-[#E8F3FF]">
+                  <img
+                    src={step3Art}
+                    alt="Imagine - Explore possibilities for your future"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="px-2 py-0.5 rounded-md bg-[#062B50] text-white text-[11px] font-extrabold tracking-wider">

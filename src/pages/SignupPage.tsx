@@ -254,14 +254,14 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onNavigate }) => {
                   <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between">
                     <span className="flex items-center gap-1.5 font-semibold">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Consent pathway: {consentData.consentPathway === 'guardian_direct' ? 'Parent / Guardian' : 'Student (Guardian Approved)'}</span>
+                      <span>Student Consent Confirmed</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setCurrentStep('consent')}
                       className="text-[11px] font-bold text-emerald-700 underline cursor-pointer"
                     >
-                      Edit
+                      Review
                     </button>
                   </div>
                 )}

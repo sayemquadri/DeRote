@@ -46,13 +46,13 @@ export const StudentConsentPage: React.FC<StudentConsentPageProps> = ({ onNaviga
         <div className="mb-8 text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F3FF] text-[#0866C6] text-xs font-bold mb-3">
             <Shield className="w-3.5 h-3.5" />
-            <span>Age-Appropriate Consent Framework</span>
+            <span>Student Consent Framework</span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#062B50] tracking-tight">
-            Student &amp; Guardian Privacy &amp; Consent
+            Student Privacy &amp; Consent
           </h1>
           <p className="text-xs sm:text-sm text-[#64778C] mt-2 max-w-2xl">
-            DeRote believes in clear, honest, and accessible transparency for students in Classes 8, 9, and 10 and their parents or legal guardians.
+            DeRote believes in clear, honest, and accessible transparency for students in Classes 8, 9, and 10.
           </p>
         </div>
 
@@ -77,9 +77,8 @@ export const StudentConsentPage: React.FC<StudentConsentPageProps> = ({ onNaviga
           </p>
           <ul className="list-disc pl-5 space-y-1 text-[#64778C]">
             <li><strong>Firebase Firestore Consent Collection:</strong> Store immutable, timestamped consent documents linked to student UID or mobile number.</li>
-            <li><strong>Parent/Guardian Verification:</strong> Send OTP or digital verification to the parent&apos;s mobile number before recording minor student consent.</li>
             <li><strong>Audit Logging:</strong> Maintain non-repudiation records of policy version accepted, IP address, and timestamp.</li>
-            <li><strong>Automated Data Deletion Engine:</strong> Secure Cloud Function to purge student data upon verified parental erasure requests.</li>
+            <li><strong>Automated Data Deletion Engine:</strong> Secure Cloud Function to purge student data upon verified erasure requests.</li>
           </ul>
         </div>
       </main>

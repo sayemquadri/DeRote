@@ -5,23 +5,17 @@ import {
   Users,
   School,
   Lock,
-  Mail,
-  AlertTriangle,
-  Info,
   ChevronDown,
   ChevronUp,
   ExternalLink,
   BookOpen,
+  FileText,
+  Sparkles,
 } from 'lucide-react';
 
 export interface ConsentFormData {
-  consentPathway: 'student_with_guardian' | 'guardian_direct';
-  guardianName: string;
-  guardianPhone: string;
-  agreedToPurpose: boolean;
-  agreedToNoSchoolAccess: boolean;
-  agreedToDeRoteAccessAndFuturePrinting: boolean;
-  agreedToGuardianConsent: boolean;
+  agreedToStudentConsent: boolean;
+  timestamp: string;
 }
 
 interface StudentConsentCardProps {
@@ -30,50 +24,122 @@ interface StudentConsentCardProps {
   compact?: boolean;
 }
 
+interface PolicyAccordionItem {
+  id: string;
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  summary: string;
+  details: string[];
+  linkRoute?: string;
+  linkLabel?: string;
+}
+
+const POLICY_ITEMS: PolicyAccordionItem[] = [
+  {
+    id: 'purpose',
+    title: 'Educational Self-Reflection (Not Clinical)',
+    icon: BookOpen,
+    summary:
+      'DeRote reflects your learning preferences and interests — it is never a test, personality ranking, or psychological diagnosis.',
+    details: [
+      'The DeRote Student Insight System exists exclusively to help students understand their learning habits and preferences. It does NOT evaluate, diagnose, or treat any psychological, cognitive, psychiatric, or mental health conditions.',
+      "Our guiding philosophy is \"Reflect, don't judge\". Answers reflect reported preferences to support thoughtful mentor guidance and positive self-awareness.",
+    ],
+    linkRoute: '/privacy',
+    linkLabel: 'Read Full Privacy Policy',
+  },
+  {
+    id: 'management',
+    title: 'Direct DeRote Platform & School Access',
+    icon: School,
+    summary:
+      'DeRote operates and manages this platform directly, and schools have no platform logins or access to student accounts.',
+    details: [
+      'DeRote is an educational coaching organization expanding online services and directly oversees all platform operations, data security, and student profiles.',
+      'School institutions are not involved in this current phase and have no access to student questionnaire responses, account credentials, or student dashboards.',
+    ],
+  },
+  {
+    id: 'mentors',
+    title: 'Authorised Mentors & Future School Reports',
+    icon: Users,
+    summary:
+      'Only designated DeRote mentors review reflections, and printed reports may be shared with schools in future phases under agreements.',
+    details: [
+      'Only authorized DeRote mentors, academic counselors, HODs, and administrators can access student reflection reports to offer personalized guidance.',
+      'Student data is strictly confidential and is never sold, traded, or used for commercial advertising.',
+      'In a future school deployment phase, authorized staff may print physical report snapshots to share with participating schools under formal institutional agreements.',
+    ],
+  },
+  {
+    id: 'terms',
+    title: 'Terms of Use & Student Conduct',
+    icon: FileText,
+    summary:
+      'You agree to provide authentic responses, keep your password secure, and use the platform solely for personal educational reflection.',
+    details: [
+      'Students receive a personal, non-exclusive license to take the questionnaire, view insight dashboards, and print their own reflection summaries.',
+      'You are responsible for maintaining the confidentiality of your mobile number and password, and using the platform respectfully and constructively.',
+    ],
+    linkRoute: '/terms',
+    linkLabel: 'Read Terms of Use',
+  },
+  {
+    id: 'privacy',
+    title: 'Privacy Rights & Erasure Requests',
+    icon: Lock,
+    summary:
+      'You can review your submitted responses at any time and request data correction or permanent deletion whenever you wish.',
+    details: [
+      'Students have the right to access their submitted data, review questionnaire answers, request corrections, or demand complete erasure of their account and responses.',
+      'Privacy and data erasure requests can be submitted anytime through our Contact & Privacy Requests page.',
+    ],
+    linkRoute: '/contact-privacy',
+    linkLabel: 'Privacy & Deletion Requests',
+  },
+];
+
 export const StudentConsentCard: React.FC<StudentConsentCardProps> = ({
   onConsentComplete,
   onNavigate,
   compact = false,
 }) => {
-  const [pathway, setPathway] = useState<'student_with_guardian' | 'guardian_direct'>('student_with_guardian');
-  const [guardianName, setGuardianName] = useState('');
-  const [guardianPhone, setGuardianPhone] = useState('');
+  // Accordion open/close state per item
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
-  // Checkbox acknowledgements (not just a single unchecked box)
-  const [ackPurpose, setAckPurpose] = useState(false);
-  const [ackNoSchoolAccess, setAckNoSchoolAccess] = useState(false);
-  const [ackDeRoteAccess, setAckDeRoteAccess] = useState(false);
-  const [ackGuardian, setAckGuardian] = useState(false);
-
-  // Expandable details section
-  const [showFullNotice, setShowFullNotice] = useState(!compact);
+  // Single consent confirmation checkbox
+  const [agreedToConsent, setAgreedToConsent] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  const allChecked = ackPurpose && ackNoSchoolAccess && ackDeRoteAccess && ackGuardian;
-  const guardianFieldsValid = pathway === 'guardian_direct' ? (guardianName.trim().length > 0 && guardianPhone.trim().length >= 10) : true;
+  const toggleItem = (id: string) => {
+    setExpandedItems((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleToggleAll = (expand: boolean) => {
+    const newState: Record<string, boolean> = {};
+    POLICY_ITEMS.forEach((item) => {
+      newState[item.id] = expand;
+    });
+    setExpandedItems(newState);
+  };
+
+  const isAnyExpanded = Object.values(expandedItems).some(Boolean);
 
   const handleProceed = () => {
     setValidationError('');
 
-    if (!allChecked) {
-      setValidationError('Please review and check all four acknowledgement points below to proceed.');
-      return;
-    }
-
-    if (pathway === 'guardian_direct' && !guardianFieldsValid) {
-      setValidationError('Please provide the parent or guardian full name and a valid 10-digit mobile number.');
+    if (!agreedToConsent) {
+      setValidationError('Please review and check the student consent box below to continue.');
       return;
     }
 
     if (onConsentComplete) {
       onConsentComplete({
-        consentPathway: pathway,
-        guardianName: guardianName.trim(),
-        guardianPhone: guardianPhone.trim(),
-        agreedToPurpose: ackPurpose,
-        agreedToNoSchoolAccess: ackNoSchoolAccess,
-        agreedToDeRoteAccessAndFuturePrinting: ackDeRoteAccess,
-        agreedToGuardianConsent: ackGuardian,
+        agreedToStudentConsent: true,
+        timestamp: new Date().toISOString(),
       });
     }
   };
@@ -81,279 +147,140 @@ export const StudentConsentCard: React.FC<StudentConsentCardProps> = ({
   return (
     <div className="w-full bg-white rounded-3xl border border-[#E8F3FF] shadow-xl shadow-[#062B50]/5 overflow-hidden text-left">
       {/* Header Badge & Title */}
-      <div className="bg-gradient-to-r from-[#062B50] to-[#0866C6] text-white p-5 sm:p-7">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs text-xs font-bold mb-2.5">
+      <div className="bg-gradient-to-r from-[#062B50] to-[#0866C6] text-white p-5 sm:px-7 sm:py-6">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-xs text-xs font-bold mb-2">
           <Shield className="w-3.5 h-3.5 text-[#E8F3FF]" />
-          <span>Student &amp; Guardian Privacy Notice</span>
+          <span>Student Privacy &amp; Consent</span>
         </div>
         <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
-          How DeRote Protects Student Data
+          How DeRote Protects Your Privacy
         </h2>
-        <p className="text-xs sm:text-sm text-[#E8F3FF]/90 mt-1.5 leading-relaxed max-w-xl">
-          Designed for students in Classes 8, 9, and 10 and their parents/guardians. Please read how your information is handled before proceeding.
-        </p>
-      </div>
-
-      {/* Backend Status Disclaimer Banner */}
-      <div className="bg-amber-50 border-b border-amber-200 px-5 sm:px-7 py-3 text-amber-900 text-xs flex items-start gap-2.5">
-        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-        <div className="space-y-0.5">
-          <p className="font-bold text-amber-950 uppercase tracking-wider text-[11px]">
-            Preview Architecture Notice (Firebase Disconnected)
-          </p>
-          <p className="text-amber-800 leading-snug">
-            Firebase is not connected in this phase. This interface demonstrates the student and guardian consent flow. In production, legally adequate consent records will be cryptographically logged to Firebase Firestore with verified timestamps and parent/guardian audit trails.
-          </p>
-        </div>
       </div>
 
       <div className="p-5 sm:p-7 space-y-6">
-        {/* The 8 Core DeRote Privacy Principles */}
+        {/* Simplified Accordion Section Header */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-[#0866C6] flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
-              <span>What You Need to Know (8 Key Principles)</span>
+              <span>Key Principles &amp; Policies</span>
             </h3>
-            {compact && (
-              <button
-                type="button"
-                onClick={() => setShowFullNotice(!showFullNotice)}
-                className="text-xs font-bold text-[#0866C6] hover:text-[#062B50] flex items-center gap-1 cursor-pointer"
-              >
-                <span>{showFullNotice ? 'Collapse Details' : 'Expand Details'}</span>
-                {showFullNotice ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </button>
-            )}
-          </div>
-
-          {showFullNotice && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs leading-relaxed text-[#334E68]">
-              {/* Item 1 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">1</span>
-                  <span>DeRote Operates &amp; Manages the Platform</span>
-                </div>
-                <p>
-                  DeRote is an educational coaching organization expanding online services. DeRote manages this platform and its data directly.
-                </p>
-              </div>
-
-              {/* Item 2 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">2</span>
-                  <span>Educational Self-Reflection (Not Clinical)</span>
-                </div>
-                <p>
-                  The platform helps students reflect on learning habits and preferences. It is <strong>NOT a medical, psychological, or diagnostic tool</strong>.
-                </p>
-              </div>
-
-              {/* Item 3 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">3</span>
-                  <span>What We Collect &amp; Why</span>
-                </div>
-                <p>
-                  We collect student name, class (8, 9, 10), school name, mobile number for login, and questionnaire choices to generate your personal reflection report.
-                </p>
-              </div>
-
-              {/* Item 4 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">4</span>
-                  <span>How Reports Are Used</span>
-                </div>
-                <p>
-                  Reports provide personalized study insights and discussion starters for mentors. Data is never sold, traded, or used for advertising.
-                </p>
-              </div>
-
-              {/* Item 5 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">5</span>
-                  <span>Authorised Personnel Access Only</span>
-                </div>
-                <p>
-                  Only designated DeRote mentors, academic counselors, HODs, and administrators may access student profile records.
-                </p>
-              </div>
-
-              {/* Item 6 */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200">
-                <div className="flex items-center gap-2 mb-1 text-amber-950 font-bold">
-                  <span className="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">6</span>
-                  <span>Schools Do Not Have Direct Access</span>
-                </div>
-                <p className="text-amber-900">
-                  Schools are not involved in this current phase and have no platform logins or access to student accounts.
-                </p>
-              </div>
-
-              {/* Item 7 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">7</span>
-                  <span>Future School Printing Notice</span>
-                </div>
-                <p>
-                  In a future school deployment phase, an authorized DeRote HOD may print student reports to share with a school under applicable agreements.
-                </p>
-              </div>
-
-              {/* Item 8 */}
-              <div className="p-3.5 rounded-2xl bg-[#F8FAFD] border border-[#E8F3FF]">
-                <div className="flex items-center gap-2 mb-1 text-[#062B50] font-bold">
-                  <span className="w-5 h-5 rounded-full bg-[#0866C6] text-white flex items-center justify-center text-[10px]">8</span>
-                  <span>Contact &amp; Privacy Requests</span>
-                </div>
-                <p>
-                  Students and guardians can request data copies, corrections, or complete deletion anytime via our Contact &amp; Privacy Requests page.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Age-Appropriate Pathway Selection */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-[#F4F8FD] border border-[#E8F3FF]">
-          <label className="block text-xs font-bold text-[#062B50] uppercase tracking-wider mb-2">
-            Select Your Consent Pathway (Minors Under 18)
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={() => setPathway('student_with_guardian')}
-              className={`p-3.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
-                pathway === 'student_with_guardian'
-                  ? 'bg-white border-[#0866C6] ring-2 ring-[#0866C6]/20 shadow-xs'
-                  : 'bg-white/60 border-[#E8F3FF] hover:bg-white'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  pathway === 'student_with_guardian' ? 'border-[#0866C6] bg-[#0866C6]' : 'border-[#64778C]'
-                }`}>
-                  {pathway === 'student_with_guardian' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </span>
-                <span className="font-bold text-xs sm:text-sm text-[#062B50]">Student Pathway</span>
-              </div>
-              <p className="text-[11px] text-[#64778C] mt-1 pl-6">
-                I am a student in Class 8, 9, or 10. My parent/guardian knows about and approves my participation.
-              </p>
-            </button>
 
             <button
               type="button"
-              onClick={() => setPathway('guardian_direct')}
-              className={`p-3.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
-                pathway === 'guardian_direct'
-                  ? 'bg-white border-[#0866C6] ring-2 ring-[#0866C6]/20 shadow-xs'
-                  : 'bg-white/60 border-[#E8F3FF] hover:bg-white'
-              }`}
+              onClick={() => handleToggleAll(!isAnyExpanded)}
+              className="text-xs font-bold text-[#0866C6] hover:text-[#062B50] flex items-center gap-1 cursor-pointer transition-colors"
             >
-              <div className="flex items-center gap-2">
-                <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${
-                  pathway === 'guardian_direct' ? 'border-[#0866C6] bg-[#0866C6]' : 'border-[#64778C]'
-                }`}>
-                  {pathway === 'guardian_direct' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
-                </span>
-                <span className="font-bold text-xs sm:text-sm text-[#062B50]">Parent / Guardian Pathway</span>
-              </div>
-              <p className="text-[11px] text-[#64778C] mt-1 pl-6">
-                I am a parent or legal guardian registering and providing consent on behalf of my child.
-              </p>
+              <span>{isAnyExpanded ? 'Collapse All' : 'Expand All'}</span>
+              {isAnyExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
           </div>
 
-          {/* Additional Parent Details if Guardian Pathway */}
-          {pathway === 'guardian_direct' && (
-            <div className="mt-4 pt-4 border-t border-[#E8F3FF] grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-[#062B50] mb-1">
-                  Parent / Guardian Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={guardianName}
-                  onChange={(e) => setGuardianName(e.target.value)}
-                  placeholder="e.g. Ramesh Sharma"
-                  className="w-full min-h-[42px] px-3 rounded-xl border border-[#062B50]/15 bg-white text-xs sm:text-sm outline-none focus:border-[#0866C6]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-[#062B50] mb-1">
-                  Guardian Mobile Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={guardianPhone}
-                  onChange={(e) => setGuardianPhone(e.target.value.replace(/[^\d]/g, ''))}
-                  maxLength={10}
-                  placeholder="10-digit mobile number"
-                  className="w-full min-h-[42px] px-3 rounded-xl border border-[#062B50]/15 bg-white text-xs sm:text-sm outline-none focus:border-[#0866C6]"
-                />
-              </div>
-            </div>
-          )}
+          {/* Clean Accordion Cards */}
+          <div className="space-y-2.5">
+            {POLICY_ITEMS.map((item, index) => {
+              const Icon = item.icon;
+              const isExpanded = !!expandedItems[item.id];
+
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-[#E8F3FF] bg-[#F8FAFD] hover:border-[#168FE5]/30 transition-all overflow-hidden"
+                >
+                  {/* Card Header: Clean Single-Line Row */}
+                  <div
+                    onClick={() => toggleItem(item.id)}
+                    className="p-3 sm:p-3.5 cursor-pointer flex items-center justify-between gap-3 group select-none"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleItem(item.id);
+                      }
+                    }}
+                    aria-expanded={isExpanded}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-[#E8F3FF] text-[#0866C6] flex items-center justify-center shrink-0 group-hover:bg-[#0866C6] group-hover:text-white transition-colors">
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+
+                      <div className="min-w-0 flex-1 flex items-center gap-2">
+                        <span className="text-[11px] font-extrabold text-[#0866C6] shrink-0">
+                          0{index + 1}
+                        </span>
+                        <span className="text-xs sm:text-[13px] font-bold text-[#062B50] truncate sm:whitespace-normal">
+                          {item.title}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Small Expand Toggle */}
+                    <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-[#0866C6] group-hover:text-[#062B50] pl-2">
+                      <span className="hidden sm:inline">{isExpanded ? 'Hide' : 'Details'}</span>
+                      {isExpanded ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Expandable Details Container */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 pt-2.5 border-t border-[#E8F3FF]/80 bg-white space-y-2 text-xs text-[#334E68] leading-relaxed">
+                      <p className="font-semibold text-[#062B50]">
+                        {item.summary}
+                      </p>
+                      {item.details.map((detail, idx) => (
+                        <p key={idx}>{detail}</p>
+                      ))}
+
+                      {item.linkRoute && item.linkLabel && (
+                        <div className="pt-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onNavigate(item.linkRoute!);
+                            }}
+                            className="inline-flex items-center gap-1 font-bold text-[#0866C6] hover:text-[#062B50] hover:underline cursor-pointer"
+                          >
+                            <span>{item.linkLabel}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Clear, Honest Checklist Acknowledgements */}
-        <div className="space-y-3">
-          <label className="block text-xs font-bold text-[#062B50] uppercase tracking-wider">
-            Mandatory Acknowledgements
-          </label>
+        {/* Unified Student Consent Confirmation (Single Checkbox) */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#E8F3FF]/60 border border-[#168FE5]/25 space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#0866C6] shrink-0" />
+            <h3 className="text-xs font-bold text-[#062B50] uppercase tracking-wider">
+              Student Consent Confirmation
+            </h3>
+          </div>
 
-          <label className="flex items-start gap-3 p-3 rounded-xl bg-white border border-[#E8F3FF] hover:bg-[#F8FAFD] cursor-pointer transition-colors">
+          <label className="flex items-start gap-3 p-3.5 rounded-xl bg-white border border-[#168FE5]/20 hover:border-[#0866C6] cursor-pointer transition-colors shadow-xs">
             <input
               type="checkbox"
-              checked={ackPurpose}
-              onChange={(e) => setAckPurpose(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded text-[#0866C6] border-[#062B50]/20 focus:ring-[#0866C6] cursor-pointer"
+              checked={agreedToConsent}
+              onChange={(e) => {
+                setAgreedToConsent(e.target.checked);
+                if (validationError) setValidationError('');
+              }}
+              className="mt-0.5 w-4 h-4 rounded text-[#0866C6] border-[#062B50]/20 focus:ring-[#0866C6] cursor-pointer shrink-0"
             />
-            <span className="text-xs text-[#334E68] leading-snug">
-              <strong>Educational Purpose:</strong> I understand that DeRote operates this platform for self-reflection and that it is <strong>not a medical, psychological, or diagnostic tool</strong>.
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 p-3 rounded-xl bg-white border border-[#E8F3FF] hover:bg-[#F8FAFD] cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={ackNoSchoolAccess}
-              onChange={(e) => setAckNoSchoolAccess(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded text-[#0866C6] border-[#062B50]/20 focus:ring-[#0866C6] cursor-pointer"
-            />
-            <span className="text-xs text-[#334E68] leading-snug">
-              <strong>Direct DeRote Management:</strong> I understand that schools do not currently have direct access to student accounts or data.
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 p-3 rounded-xl bg-white border border-[#E8F3FF] hover:bg-[#F8FAFD] cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={ackDeRoteAccess}
-              onChange={(e) => setAckDeRoteAccess(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded text-[#0866C6] border-[#062B50]/20 focus:ring-[#0866C6] cursor-pointer"
-            />
-            <span className="text-xs text-[#334E68] leading-snug">
-              <strong>Authorised Access &amp; Future Printing:</strong> I understand that authorized DeRote personnel (mentors, HODs) may access data, and in a future school deployment, reports may be printed under applicable permissions.
-            </span>
-          </label>
-
-          <label className="flex items-start gap-3 p-3 rounded-xl bg-white border border-[#E8F3FF] hover:bg-[#F8FAFD] cursor-pointer transition-colors">
-            <input
-              type="checkbox"
-              checked={ackGuardian}
-              onChange={(e) => setAckGuardian(e.target.checked)}
-              className="mt-0.5 w-4 h-4 rounded text-[#0866C6] border-[#062B50]/20 focus:ring-[#0866C6] cursor-pointer"
-            />
-            <span className="text-xs text-[#334E68] leading-snug">
-              <strong>Guardian Awareness &amp; Rights:</strong> I confirm {pathway === 'guardian_direct' ? 'I am the parent/guardian providing lawful consent' : 'parent/guardian awareness and consent for this minor student'}, and note that we can request data deletion or contact DeRote at any time.
+            <span className="text-xs text-[#102C46] leading-relaxed">
+              <strong>I agree to participate in DeRote student self-reflection.</strong> I understand that this is an educational tool to explore my learning preferences (not a medical or psychological diagnosis), and I agree to the platform Privacy Policy and Terms of Use.
             </span>
           </label>
         </div>
@@ -361,18 +288,18 @@ export const StudentConsentCard: React.FC<StudentConsentCardProps> = ({
         {/* Validation Error Message */}
         {validationError && (
           <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-900 text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+            <Shield className="w-4 h-4 text-red-500 shrink-0" />
             <span>{validationError}</span>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="space-y-3 pt-2">
+        <div className="space-y-3 pt-1">
           {onConsentComplete ? (
             <button
               type="button"
               onClick={handleProceed}
-              disabled={!allChecked}
+              disabled={!agreedToConsent}
               className="w-full min-h-[50px] rounded-xl bg-[#0866C6] text-white font-bold text-sm hover:bg-[#062B50] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -388,14 +315,14 @@ export const StudentConsentCard: React.FC<StudentConsentCardProps> = ({
             </button>
           )}
 
-          {/* Quick links to full policies */}
+          {/* Quick Links to Legal Documents */}
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-[#0866C6] pt-1">
             <button
               type="button"
               onClick={() => onNavigate('/privacy')}
               className="hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>Read Full Privacy Policy</span>
+              <span>Full Privacy Policy</span>
               <ExternalLink className="w-3 h-3" />
             </button>
             <span className="text-[#64778C]/40">·</span>
@@ -404,7 +331,7 @@ export const StudentConsentCard: React.FC<StudentConsentCardProps> = ({
               onClick={() => onNavigate('/terms')}
               className="hover:underline flex items-center gap-1 cursor-pointer"
             >
-              <span>Read Terms of Use</span>
+              <span>Terms of Use</span>
               <ExternalLink className="w-3 h-3" />
             </button>
             <span className="text-[#64778C]/40">·</span>

@@ -91,7 +91,7 @@ export const HeroVisual: React.FC<HeroVisualProps> = ({ className = '' }) => {
       >
         <div className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-gradient-to-r from-[#062B50]/90 to-[#0866C6]/90 text-white backdrop-blur-md shadow-xl shadow-[#0866C6]/20 border border-white/20 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#168FE5] animate-ping opacity-75" />
-          <span className="text-xs font-bold tracking-tight">Classes 5–12</span>
+          <span className="text-xs font-bold tracking-tight">Classes 8–10</span>
         </div>
       </div>
 

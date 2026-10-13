@@ -31,7 +31,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, className = '' }) =>
             className="hover:text-[#0866C6] transition-colors cursor-pointer flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-[#0866C6] rounded px-1"
           >
             <CheckCircle2 className="w-3.5 h-3.5 text-[#0866C6]" />
-            <span>Student & Guardian Consent</span>
+            <span>Student Consent &amp; Privacy</span>
           </button>
 
           <button

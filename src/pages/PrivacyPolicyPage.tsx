@@ -313,7 +313,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
             onClick={() => onNavigate('/consent')}
             className="px-4 py-2.5 rounded-xl bg-[#E8F3FF] text-[#0866C6] font-bold text-xs sm:text-sm hover:bg-[#168FE5]/20 border border-[#168FE5]/30 transition-colors cursor-pointer"
           >
-            Review Student &amp; Guardian Consent
+            Review Student Consent &amp; Privacy
           </button>
           <button
             onClick={() => onNavigate('/terms')}

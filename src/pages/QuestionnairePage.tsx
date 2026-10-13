@@ -536,31 +536,40 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
 
             {/* Question Progress Bar Beneath Question */}
             <div className="mt-6 pt-4 border-t border-[#F0F6FD]">
-              <div className="flex items-center justify-between text-xs font-semibold text-[#64778C] mb-1.5">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#0866C6] animate-pulse" />
-                  <span>Progress: Question {currentIndex + 1} of {QUESTION_BANK.length}</span>
-                </span>
-                <span className="text-[#0866C6] font-bold transition-all duration-500 ease-out">
-                  {progressPercentage}% Completed ({answeredCount} answered)
-                </span>
-              </div>
-              <div className="w-full h-3 bg-[#E8F3FF] rounded-full overflow-hidden p-0.5 shadow-inner relative">
-                <div
-                  className="h-full bg-gradient-to-r from-[#0866C6] via-[#168FE5] to-emerald-500 rounded-full relative overflow-hidden transition-[width] duration-700 ease-[cubic-bezier(0.34,1.1,0.64,1)]"
-                  style={{ width: `${Math.max(5, ((currentIndex + 1) / QUESTION_BANK.length) * 100)}%` }}
-                >
-                  {/* Shimmer light sweep */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/35 to-transparent animate-shimmer pointer-events-none" />
+              {/* Top row: current question indicator & answered status */}
+              <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs font-semibold text-[#64778C] mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#0866C6] shrink-0" aria-hidden="true" />
+                  <span className="text-[#062B50] font-bold">
+                    Question {currentIndex + 1} of {QUESTION_BANK.length}
+                  </span>
+                </div>
+                <div className="text-[11px] sm:text-xs font-semibold text-[#0866C6] shrink-0">
+                  {progressPercentage}% completed · {answeredCount} of {QUESTION_BANK.length} answered
                 </div>
               </div>
-              <div className="flex justify-between items-center text-[11px] text-[#64778C] mt-1.5 font-medium">
-                <span className="flex items-center gap-1 text-[#0866C6]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0866C6]" />
-                  <span>Start</span>
+
+              {/* Linear progress bar */}
+              <div className="w-full h-2.5 bg-[#E8F3FF] rounded-full overflow-hidden shadow-inner relative">
+                <div
+                  className="h-full bg-gradient-to-r from-[#0866C6] via-[#168FE5] to-emerald-500 rounded-full relative overflow-hidden transition-[width] duration-500 ease-out"
+                  style={{ width: `${Math.max(5, ((currentIndex + 1) / QUESTION_BANK.length) * 100)}%` }}
+                >
+                  {/* Subtle shimmer sweep */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Bottom metadata row: reassuring skip hint & remaining counter without overlap */}
+              <div className="flex items-center justify-between gap-3 text-[11px] text-[#64778C] mt-2 font-medium">
+                <span className="truncate">
+                  Optional questions can be skipped anytime
                 </span>
-                <span>Optional questions can be skipped anytime</span>
-                <span className="text-[#062B50] font-semibold">Question 14</span>
+                <span className="shrink-0 text-[#0866C6] font-semibold whitespace-nowrap">
+                  {QUESTION_BANK.length - (currentIndex + 1) === 0
+                    ? 'Final question'
+                    : `${QUESTION_BANK.length - (currentIndex + 1)} remaining`}
+                </span>
               </div>
             </div>
           </div>
