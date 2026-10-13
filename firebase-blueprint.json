@@ -1,0 +1,239 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Registered student profile and reflection progress tracking in DeRote",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique student identifier",
+          "maxLength": 128
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Student's full legal or school registered name",
+          "maxLength": 120
+        },
+        "classGrade": {
+          "type": "string",
+          "description": "Academic grade level (e.g., 8, 9, 10)",
+          "maxLength": 20
+        },
+        "schoolName": {
+          "type": "string",
+          "description": "Affiliated school or educational institution",
+          "maxLength": 200
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact mobile number",
+          "maxLength": 20
+        },
+        "email": {
+          "type": "string",
+          "description": "Student email address",
+          "maxLength": 120
+        },
+        "completedReflections": {
+          "type": "number",
+          "description": "Number of completed reflection assessments"
+        },
+        "totalReflections": {
+          "type": "number",
+          "description": "Total reflections available for current grade"
+        },
+        "badge": {
+          "type": "string",
+          "description": "Class cohort badge designation",
+          "maxLength": 80
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of account creation",
+          "maxLength": 50
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "ISO timestamp of last activity",
+          "maxLength": 50
+        }
+      },
+      "required": ["id", "fullName", "classGrade", "schoolName", "phone", "createdAt"]
+    },
+    "QuestionnaireSession": {
+      "title": "QuestionnaireSession",
+      "description": "Student questionnaire responses and evaluation status",
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "Unique session identifier",
+          "maxLength": 128
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Student identifier owning this response session",
+          "maxLength": 128
+        },
+        "version": {
+          "type": "string",
+          "description": "Questionnaire bank version (e.g., v1_classes_8_10)",
+          "maxLength": 50
+        },
+        "status": {
+          "type": "string",
+          "description": "Completion state",
+          "enum": ["draft", "submitted"],
+          "maxLength": 20
+        },
+        "currentQuestionIndex": {
+          "type": "number",
+          "description": "Current zero-based index of question in progress"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of session initiation",
+          "maxLength": 50
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of latest answer modification",
+          "maxLength": 50
+        },
+        "submittedAt": {
+          "type": "string",
+          "description": "ISO timestamp when submitted",
+          "maxLength": 50
+        }
+      },
+      "required": ["sessionId", "studentId", "version", "status", "currentQuestionIndex", "createdAt", "updatedAt"]
+    },
+    "PrivacyRequest": {
+      "title": "PrivacyRequest",
+      "description": "Formal student or guardian data rights request under DPDP regulations",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique privacy request identifier",
+          "maxLength": 128
+        },
+        "requestType": {
+          "type": "string",
+          "description": "Category of data request (e.g., access, deletion, rectification)",
+          "maxLength": 50
+        },
+        "requesterRole": {
+          "type": "string",
+          "description": "Relationship of requester to student (student or guardian)",
+          "enum": ["student", "guardian"],
+          "maxLength": 20
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Full name of the student",
+          "maxLength": 120
+        },
+        "guardianName": {
+          "type": "string",
+          "description": "Full name of the parent or guardian if applicable",
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "description": "Contact telephone number",
+          "maxLength": 20
+        },
+        "email": {
+          "type": "string",
+          "description": "Contact email address",
+          "maxLength": 120
+        },
+        "schoolName": {
+          "type": "string",
+          "description": "Student school name",
+          "maxLength": 200
+        },
+        "classGrade": {
+          "type": "string",
+          "description": "Class grade",
+          "maxLength": 20
+        },
+        "requestDetails": {
+          "type": "string",
+          "description": "Details of the privacy inquiry",
+          "maxLength": 2000
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the inquiry",
+          "enum": ["pending", "in_review", "resolved", "rejected"],
+          "maxLength": 30
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp when request was submitted",
+          "maxLength": 50
+        }
+      },
+      "required": ["id", "requestType", "requesterRole", "studentName", "phone", "requestDetails", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized school coordinator or institutional administrator",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Admin identifier or UID",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "description": "Verified official email address",
+          "maxLength": 120
+        },
+        "fullName": {
+          "type": "string",
+          "description": "Full name of coordinator",
+          "maxLength": 120
+        },
+        "roleTitle": {
+          "type": "string",
+          "description": "Institutional role title",
+          "maxLength": 100
+        },
+        "institution": {
+          "type": "string",
+          "description": "School institution name",
+          "maxLength": 200
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Account provisioning timestamp",
+          "maxLength": 50
+        }
+      },
+      "required": ["id", "email", "fullName", "roleTitle", "institution"]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Individual student profile records"
+    },
+    "/students/{studentId}/sessions/{sessionId}": {
+      "schema": "QuestionnaireSession",
+      "description": "Questionnaire reflection sessions and answers for a student"
+    },
+    "/privacy_requests/{requestId}": {
+      "schema": "PrivacyRequest",
+      "description": "Student and guardian privacy compliance and data deletion requests"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Institutional administrator access records"
+    }
+  }
+}

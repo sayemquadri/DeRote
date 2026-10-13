@@ -11,6 +11,9 @@
 
 import { saveActiveStudentProfile, clearStudentSession, StudentProfile } from './questionnaireService';
 
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { db, OperationType, handleFirestoreError } from './firebase';
+
 export interface LocalStudentAccount {
   id: string;
   fullName: string;
@@ -48,6 +51,30 @@ export function isValidIndianMobile(raw: string): boolean {
  * Student roster
  */
 export const DEMO_STUDENT_ROSTER: LocalStudentAccount[] = [];
+
+/**
+ * Syncs student account to Firestore
+ */
+export async function syncStudentToFirestore(account: LocalStudentAccount): Promise<void> {
+  const path = `students/${account.id}`;
+  try {
+    await setDoc(doc(db, 'students', account.id), {
+      id: account.id,
+      fullName: account.fullName,
+      classGrade: account.classGrade,
+      schoolName: account.schoolName,
+      phone: account.phone,
+      email: account.email || `${account.phone}@student.derote.in`,
+      completedReflections: account.completedReflections || 0,
+      totalReflections: account.totalReflections || 3,
+      badge: account.badge || `Class ${account.classGrade} Student`,
+      createdAt: account.createdAt,
+      lastLoginAt: account.lastLoginAt,
+    });
+  } catch (err) {
+    console.warn(`Firestore sync warning for ${path}:`, err);
+  }
+}
 
 /**
  * Retrieves all registered accounts saved in browser localStorage
@@ -119,7 +146,7 @@ export function setActiveStudentSession(student: LocalStudentAccount | null): vo
 }
 
 /**
- * Registers a new student locally (in-memory & localStorage)
+ * Registers a new student locally & syncs to Firestore
  */
 export function registerLocalStudent(data: {
   fullName: string;
@@ -145,13 +172,13 @@ export function registerLocalStudent(data: {
   }
 
   const newAccount: LocalStudentAccount = {
-    id: `student_local_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    id: `student_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     fullName: data.fullName.trim(),
     classGrade: data.classGrade.trim(),
     schoolName: data.schoolName.trim(),
     phone: cleanPhone,
     password: data.password || 'password123',
-    email: data.email || `${cleanPhone}@student.derote.local`,
+    email: data.email || `${cleanPhone}@student.derote.in`,
     completedReflections: 0,
     totalReflections: 3,
     badge: `Class ${data.classGrade} Student`,
@@ -163,6 +190,9 @@ export function registerLocalStudent(data: {
   existing.push(newAccount);
   saveStoredAccounts(existing);
   setActiveStudentSession(newAccount);
+
+  // Sync to Firestore
+  syncStudentToFirestore(newAccount);
 
   return { success: true, student: newAccount };
 }
@@ -183,6 +213,7 @@ export function loginLocalStudent(
     match.lastLoginAt = new Date().toISOString();
     saveStoredAccounts(accounts);
     setActiveStudentSession(match);
+    syncStudentToFirestore(match);
     return { success: true, student: match };
   }
 

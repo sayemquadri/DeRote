@@ -81,8 +81,11 @@ export const createDefaultAnswers = (): Record<string, QuestionAnswerState> => {
   return answers;
 };
 
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from './firebase';
+
 /**
- * Gets or loads active questionnaire session from local storage.
+ * Gets or loads active questionnaire session from local storage and Firestore.
  */
 export const loadQuestionnaireSession = async (
   profile: StudentProfile
@@ -93,25 +96,29 @@ export const loadQuestionnaireSession = async (
 }> => {
   const version = 'v1_classes_8_10';
 
-  // 1. Local storage draft check
+  // 1. Try local storage draft first
+  let localDraft: QuestionnaireSession | null = null;
   try {
     const savedRaw = localStorage.getItem(`${LOCAL_DRAFT_KEY}_${profile.id}`);
     if (savedRaw) {
-      const parsed: QuestionnaireSession = JSON.parse(savedRaw);
-      const isSubmitted = parsed.status === 'submitted';
-      return {
-        session: parsed,
-        isExistingDraft: !isSubmitted && hasAnyAnswers(parsed.answers),
-        isAlreadySubmitted: isSubmitted,
-      };
+      localDraft = JSON.parse(savedRaw);
     }
   } catch {
     // Ignore storage parse issues
   }
 
+  if (localDraft) {
+    const isSubmitted = localDraft.status === 'submitted';
+    return {
+      session: localDraft,
+      isExistingDraft: !isSubmitted && hasAnyAnswers(localDraft.answers),
+      isAlreadySubmitted: isSubmitted,
+    };
+  }
+
   // 2. New blank session
   const newSession: QuestionnaireSession = {
-    sessionId: `local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    sessionId: `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     studentId: profile.id,
     version,
     status: 'draft',
@@ -144,7 +151,7 @@ export const resetQuestionnaireSession = async (
   }
 
   const freshSession: QuestionnaireSession = {
-    sessionId: `local_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    sessionId: `session_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     studentId: profile.id,
     version,
     status: 'draft',
@@ -170,7 +177,7 @@ export const hasAnyAnswers = (answers: Record<string, QuestionAnswerState>): boo
 };
 
 /**
- * Saves questionnaire draft locally.
+ * Saves questionnaire draft locally and syncs to Firestore.
  */
 export const persistQuestionnaireDraft = async (
   session: QuestionnaireSession
@@ -187,11 +194,29 @@ export const persistQuestionnaireDraft = async (
     // Ignore storage quota
   }
 
-  return { confirmedCloudSaved: false };
+  let confirmedCloudSaved = false;
+  try {
+    const sessionDocRef = doc(db, 'students', session.studentId, 'sessions', session.sessionId);
+    await setDoc(sessionDocRef, {
+      sessionId: session.sessionId,
+      studentId: session.studentId,
+      version: session.version,
+      status: session.status,
+      currentQuestionIndex: session.currentQuestionIndex,
+      answers: session.answers,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+    });
+    confirmedCloudSaved = true;
+  } catch (err) {
+    console.warn('Firestore session draft sync warning:', err);
+  }
+
+  return { confirmedCloudSaved };
 };
 
 /**
- * Atomically submits and locks the student's questionnaire in local storage.
+ * Atomically submits and locks the student's questionnaire in local storage and Firestore.
  */
 export const submitQuestionnaireResponses = async (
   session: QuestionnaireSession
@@ -212,6 +237,23 @@ export const submitQuestionnaireResponses = async (
     );
   } catch {
     // Ignore storage issues
+  }
+
+  try {
+    const sessionDocRef = doc(db, 'students', session.studentId, 'sessions', session.sessionId);
+    await setDoc(sessionDocRef, {
+      sessionId: session.sessionId,
+      studentId: session.studentId,
+      version: session.version,
+      status: 'submitted',
+      currentQuestionIndex: session.currentQuestionIndex,
+      answers: session.answers,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+      submittedAt: now,
+    });
+  } catch (err) {
+    console.warn('Firestore session submit sync warning:', err);
   }
 
   return { success: true };

@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Default-Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email == 'contact@derote.in' && request.auth.token.email_verified == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Student Validator
+    function isValidStudent(data) {
+      return data.keys().hasAll(['id', 'fullName', 'classGrade', 'schoolName', 'phone', 'createdAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 120 &&
+        data.classGrade is string && data.classGrade.size() <= 20 &&
+        data.schoolName is string && data.schoolName.size() <= 200 &&
+        data.phone is string && data.phone.size() <= 20 &&
+        data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    // Questionnaire Session Validator
+    function isValidSession(data, studentId) {
+      return data.keys().hasAll(['sessionId', 'studentId', 'version', 'status', 'currentQuestionIndex', 'createdAt', 'updatedAt']) &&
+        data.sessionId is string && data.sessionId.size() <= 128 &&
+        data.studentId == studentId &&
+        data.version is string && data.version.size() <= 50 &&
+        data.status in ['draft', 'submitted'] &&
+        data.currentQuestionIndex is number &&
+        data.createdAt is string && data.createdAt.size() <= 50 &&
+        data.updatedAt is string && data.updatedAt.size() <= 50;
+    }
+
+    // Privacy Request Validator
+    function isValidPrivacyRequest(data) {
+      return data.keys().hasAll(['id', 'requestType', 'requesterRole', 'studentName', 'phone', 'requestDetails', 'createdAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.requestType is string && data.requestType.size() <= 50 &&
+        data.requesterRole in ['student', 'guardian'] &&
+        data.studentName is string && data.studentName.size() > 0 && data.studentName.size() <= 120 &&
+        data.phone is string && data.phone.size() <= 20 &&
+        data.requestDetails is string && data.requestDetails.size() > 0 && data.requestDetails.size() <= 2000 &&
+        data.createdAt is string && data.createdAt.size() <= 50;
+    }
+
+    // Students Collection
+    match /students/{studentId} {
+      allow get: if isValidId(studentId) && (isOwner(studentId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(studentId) && isValidStudent(incoming()) && (isOwner(studentId) || isAdmin());
+      allow update: if isValidId(studentId) && isValidStudent(incoming()) && (isOwner(studentId) || isAdmin()) &&
+                    incoming().id == existing().id && incoming().createdAt == existing().createdAt;
+      allow delete: if isValidId(studentId) && isAdmin();
+
+      // Nested Sessions Subcollection
+      match /sessions/{sessionId} {
+        allow get: if isValidId(studentId) && isValidId(sessionId) && (isOwner(studentId) || isAdmin());
+        allow list: if isValidId(studentId) && (isOwner(studentId) || isAdmin());
+        allow create: if isValidId(studentId) && isValidId(sessionId) && (isOwner(studentId) || isAdmin()) &&
+                      isValidSession(incoming(), studentId);
+        allow update: if isValidId(studentId) && isValidId(sessionId) && (isOwner(studentId) || isAdmin()) &&
+                      isValidSession(incoming(), studentId) &&
+                      existing().status != 'submitted' &&
+                      incoming().sessionId == existing().sessionId &&
+                      incoming().createdAt == existing().createdAt;
+        allow delete: if isValidId(studentId) && isValidId(sessionId) && isAdmin();
+      }
+    }
+
+    // Privacy & Data Requests Collection
+    match /privacy_requests/{requestId} {
+      allow get: if isValidId(requestId) && isAdmin();
+      allow list: if isAdmin();
+      allow create: if isValidId(requestId) && isValidPrivacyRequest(incoming());
+      allow update: if isValidId(requestId) && isAdmin() && isValidPrivacyRequest(incoming());
+      allow delete: if false; // Compliance records cannot be deleted by client
+    }
+
+    // Administrators Collection
+    match /admins/{adminId} {
+      allow read, write: if isValidId(adminId) && isAdmin();
+    }
+  }
+}

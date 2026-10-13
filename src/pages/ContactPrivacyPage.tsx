@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { ArrowLeft, Mail, Shield, AlertCircle, CheckCircle2, Send, Phone, MapPin, User, Info, Lock } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { Footer } from '../components/Footer';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 interface ContactPrivacyPageProps {
   onNavigate: (route: string) => void;
@@ -19,8 +21,9 @@ export const ContactPrivacyPage: React.FC<ContactPrivacyPageProps> = ({ onNaviga
   const [requestDetails, setRequestDetails] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [formError, setFormError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
@@ -41,7 +44,29 @@ export const ContactPrivacyPage: React.FC<ContactPrivacyPageProps> = ({ onNaviga
       return;
     }
 
-    setSubmitted(true);
+    setIsSubmitting(true);
+    const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    try {
+      await setDoc(doc(db, 'privacy_requests', requestId), {
+        id: requestId,
+        requestType,
+        requesterRole,
+        studentName: studentName.trim(),
+        guardianName: requesterRole === 'guardian' ? guardianName.trim() : '',
+        phone: phone.trim(),
+        email: email.trim(),
+        schoolName: schoolName.trim(),
+        classGrade,
+        requestDetails: requestDetails.trim(),
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.warn('Firestore privacy request sync notice:', err);
+    } finally {
+      setIsSubmitting(false);
+      setSubmitted(true);
+    }
   };
 
   return (
