@@ -218,7 +218,7 @@ export function AdminDashboardPage({ onNavigate }: AdminDashboardPageProps) {
               <tr style="border-bottom: 1px solid #F0F5FA;">
                 <td style="padding: 6px 8px; font-weight: 600; color: #062B50;">${s.fullName}</td>
                 <td style="padding: 6px 8px; color: #465B72;">${s.classGrade}</td>
-                <td style="padding: 6px 8px; color: ${s.isSubmitted ? '#059669' : '#D97706'}; font-weight: 600;">${s.isSubmitted ? 'Completed' : 'Draft'}</td>
+                <td style="padding: 6px 8px; color: ${s.isSubmitted ? '#059669' : '#D97706'}; font-weight: 600;">${s.isSubmitted ? 'Completed' : 'In Progress'}</td>
                 <td style="padding: 6px 8px; color: #465B72;">${s.answeredCount} / ${s.totalQuestions}</td>
                 <td style="padding: 6px 8px; color: #0866C6;">${s.insightReport.cards[0]?.heading || 'In Progress'}</td>
               </tr>
@@ -236,7 +236,7 @@ Date: ${dateStr}
 Summary Metrics:
 - Total Enrolled Students: ${analytics.totalStudents}
 - Completed Reflections: ${analytics.completedAssessments} (${analytics.completionRate}%)
-- In-Progress Drafts: ${analytics.inProgressAssessments}
+- In-Progress Assessments: ${analytics.inProgressAssessments}
 - Class Breakdown: Class 8: ${analytics.classBreakdown.class8}, Class 9: ${analytics.classBreakdown.class9}, Class 10: ${analytics.classBreakdown.class10}
 
 Top Project Draws:
@@ -246,7 +246,7 @@ Top Starter Conditions:
 ${analytics.topStarterConditions.map(i => `- ${i.label}: ${i.percentage}% (${i.count})`).join('\n')}
 
 Student Submissions:
-${studentRecords.map(s => `- ${s.fullName} (${s.classGrade}): ${s.isSubmitted ? 'Completed' : 'Draft'}, Top Theme: ${s.insightReport.cards[0]?.heading || 'In Progress'}`).join('\n')}
+${studentRecords.map(s => `- ${s.fullName} (${s.classGrade}): ${s.isSubmitted ? 'Completed' : 'In Progress'}, Top Theme: ${s.insightReport.cards[0]?.heading || 'In Progress'}`).join('\n')}
     `;
 
     const cohortFileName = `derote-cohort-report-${new Date().toISOString().slice(0, 10)}`;
@@ -281,7 +281,7 @@ ${studentRecords.map(s => `- ${s.fullName} (${s.classGrade}): ${s.isSubmitted ? 
             <p style="font-size: 12px; color: #64778C; margin: 2px 0 0 0;">${student.schoolName}</p>
           </div>
           <div style="text-align: right; font-size: 11px; color: #64778C;">
-            <div>Status: <strong style="color: ${student.isSubmitted ? '#059669' : '#D97706'};">${student.isSubmitted ? 'Completed Assessment' : 'Working Draft'}</strong></div>
+            <div>Status: <strong style="color: ${student.isSubmitted ? '#059669' : '#D97706'};">${student.isSubmitted ? 'Completed Assessment' : 'In Progress'}</strong></div>
             <div>Answered: ${student.answeredCount} / ${student.totalQuestions} Questions</div>
             <div>Date: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
           </div>
@@ -304,7 +304,7 @@ ${studentRecords.map(s => `- ${s.fullName} (${s.classGrade}): ${s.isSubmitted ? 
 Student: ${student.fullName}
 Grade: ${student.classGrade}
 School: ${student.schoolName}
-Status: ${student.isSubmitted ? 'Completed' : 'Draft'} (${student.answeredCount}/${student.totalQuestions} answered)
+Status: ${student.isSubmitted ? 'Completed' : 'In Progress'} (${student.answeredCount}/${student.totalQuestions} answered)
 
 Reflected Themes:
 ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).join('\n\n')}
@@ -366,7 +366,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
 
             <button
               type="button"
-              onClick={() => onNavigate('/prototype')}
+              onClick={() => onNavigate('/questionnaire')}
               className="text-xs font-semibold text-[#0866C6] hover:text-[#062B50] bg-white border border-[#E8F3FF] px-2.5 sm:px-3 py-1.5 rounded-xl shadow-xs cursor-pointer whitespace-nowrap"
             >
               Student Portal
@@ -489,7 +489,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
 
           <div className="bg-white p-5 rounded-2xl border border-[#E8F3FF] shadow-xs">
             <span className="text-[11px] font-bold text-[#64778C] uppercase tracking-wider block">
-              In-Progress Working Drafts
+              In-Progress Assessments
             </span>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl sm:text-3xl font-extrabold text-[#0866C6]">
@@ -853,7 +853,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full shrink-0">
                           <Clock className="w-3 h-3 text-amber-600" />
-                          <span>Draft</span>
+                          <span>In Progress</span>
                         </span>
                       )}
                     </div>
@@ -948,7 +948,7 @@ ${student.insightReport.cards.map(c => `* ${c.heading}: ${c.reflectionText}`).jo
                           ) : (
                             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
                               <Clock className="w-3 h-3 text-amber-600" />
-                              <span>Draft</span>
+                              <span>In Progress</span>
                             </span>
                           )}
                         </td>

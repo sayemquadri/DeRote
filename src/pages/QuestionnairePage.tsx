@@ -39,8 +39,6 @@ import {
 } from '../services/questionnaireService';
 import {
   getCurrentActiveStudent,
-  loginAsDemoStudent,
-  DEMO_STUDENT_ROSTER,
 } from '../services/localAuth';
 
 interface QuestionnairePageProps {
@@ -72,23 +70,6 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
-
-  // Initialize or fallback to Aarav Sharma demo if not logged in
-  useEffect(() => {
-    if (!student) {
-      // Auto-assign Aarav Sharma demo so user can immediately experience questions
-      const demoAccount = loginAsDemoStudent('demo_aarav_10');
-      if (demoAccount) {
-        setStudent({
-          id: demoAccount.id,
-          fullName: demoAccount.fullName,
-          classGrade: demoAccount.classGrade,
-          schoolName: demoAccount.schoolName,
-          phone: demoAccount.phone,
-        });
-      }
-    }
-  }, [student]);
 
   // Load session when student is present
   useEffect(() => {
@@ -282,6 +263,69 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  if (!student) {
+    return (
+      <div className="min-h-screen bg-[#F4F8FD] flex flex-col justify-between text-[#102C46]">
+        <header className="bg-white border-b border-[#E8F3FF] px-4 sm:px-8 py-3.5 sticky top-0 z-30">
+          <div className="max-w-5xl mx-auto flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => onNavigate('/')}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#64778C] hover:text-[#062B50] transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Home</span>
+            </button>
+            <DeRoteWordmark size="sm" showDescriptor={false} />
+            <button
+              type="button"
+              onClick={() => onNavigate('/login')}
+              className="text-xs font-semibold text-[#0866C6] hover:text-[#062B50] cursor-pointer"
+            >
+              Sign In
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+          <div className="max-w-md w-full bg-white rounded-3xl p-6 sm:p-8 border border-[#E8F3FF] shadow-lg text-center">
+            <div className="w-12 h-12 rounded-2xl bg-[#E8F3FF] text-[#0866C6] flex items-center justify-center mx-auto mb-4">
+              <User className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#062B50] mb-2">
+              Student Sign-In Required
+            </h1>
+            <p className="text-xs sm:text-sm text-[#64778C] leading-relaxed mb-6">
+              To begin or resume your 14 self-reflection questions and securely record your insights, please sign in with your student mobile number or create a new student account.
+            </p>
+
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => onNavigate('/login')}
+                className="w-full py-3 px-4 rounded-xl bg-[#0866C6] text-white font-bold text-sm hover:bg-[#062B50] transition-colors shadow-xs cursor-pointer"
+              >
+                Sign In to Student Account
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('/signup')}
+                className="w-full py-3 px-4 rounded-xl bg-white text-[#062B50] border border-[#E8F3FF] font-bold text-sm hover:bg-[#F4F8FD] transition-colors cursor-pointer"
+              >
+                Create Student Account
+              </button>
+            </div>
+          </div>
+        </main>
+
+        <footer className="py-4 text-center text-xs text-[#64778C] border-t border-[#E8F3FF] bg-white">
+          <span>DeRote Student Insight System · Classes 8, 9 & 10</span>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F4F8FD] flex flex-col justify-between text-[#102C46]">
       {/* Top Header */}
@@ -305,7 +349,7 @@ export function QuestionnairePage({ onNavigate }: QuestionnairePageProps) {
             <div className="hidden md:flex items-center gap-2 text-xs text-[#64778C] bg-[#F4F8FD] px-3 py-1.5 rounded-full border border-[#E8F3FF]">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>
-                {isSaving ? 'Saving...' : `Draft saved (${lastSavedTime})`}
+                {isSaving ? 'Saving...' : `Autosaved (${lastSavedTime})`}
               </span>
             </div>
 

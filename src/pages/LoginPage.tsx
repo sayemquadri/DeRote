@@ -9,23 +9,15 @@ import {
   Lock,
   CheckCircle2,
   LogOut,
-  Sparkles,
-  User,
-  GraduationCap,
-  BookOpen,
-  Award,
   ChevronRight,
-  RefreshCw,
   Shield,
 } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { Modal } from '../components/Modal';
 import {
   loginLocalStudent,
-  loginAsDemoStudent,
   signOutLocalStudent,
   onLocalAuthChange,
-  DEMO_STUDENT_ROSTER,
   LocalStudentAccount,
   isValidIndianMobile,
 } from '../services/localAuth';
@@ -39,7 +31,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState<string | null>(null);
 
   // Active student state
   const [activeStudent, setActiveStudent] = useState<LocalStudentAccount | null>(null);
@@ -57,9 +48,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   // Forgot password modal
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
-  // Selected persona tab in demo selector
-  const [selectedDemoId, setSelectedDemoId] = useState<string>('demo_aarav_10');
-
   // Subscribe to local auth state
   useEffect(() => {
     const unsub = onLocalAuthChange((student) => {
@@ -67,37 +55,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
     });
     return () => unsub();
   }, []);
-
-  // 1-Click Demo Login handler
-  const handleDemoSignIn = (studentId: string = selectedDemoId) => {
-    setIsDemoLoading(studentId);
-    setFormAlert(null);
-
-    setTimeout(() => {
-      const student = loginAsDemoStudent(studentId);
-      setIsDemoLoading(null);
-      setFormAlert({
-        type: 'success',
-        message: `Welcome, ${student.fullName}! Starting your questionnaire assessment...`,
-      });
-      // Redirect directly to the questions assessment
-      setTimeout(() => {
-        onNavigate('/questionnaire');
-      }, 400);
-    }, 200);
-  };
-
-  // Pre-fill credentials into the input fields for realistic demonstration
-  const handleAutoFillDemo = (student: LocalStudentAccount) => {
-    setMobileNumber(student.phone);
-    setPassword(student.password || 'demo123');
-    setMobileError(null);
-    setPasswordError(null);
-    setFormAlert({
-      type: 'info',
-      message: `Populated credentials for ${student.fullName} (${student.classGrade}). Click "Sign in with Mobile" below to continue.`,
-    });
-  };
 
   // Sign out handler
   const handleSignOut = () => {
@@ -239,11 +196,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                         <span className="text-sm sm:text-base font-extrabold text-[#062B50] break-words">
                           {activeStudent.fullName}
                         </span>
-                        {activeStudent.isDemo && (
-                          <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#168FE5]/20 text-[#0866C6] whitespace-nowrap shrink-0">
-                            Demo Student
-                          </span>
-                        )}
                       </div>
                       <p className="text-xs text-[#64778C] mt-0.5 break-words font-medium">
                         {activeStudent.classGrade}
@@ -283,7 +235,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                 <div className="mt-4 pt-3 border-t border-[#168FE5]/20 flex flex-col gap-2">
                   <button
                     type="button"
-                    onClick={() => onNavigate('/prototype')}
+                    onClick={() => onNavigate('/questionnaire')}
                     className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-[#0866C6] text-white font-bold text-xs sm:text-sm hover:bg-[#062B50] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs text-center"
                   >
                     <span>Launch Questionnaire Assessment</span>
@@ -322,98 +274,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
                 <span className="leading-snug">{formAlert.message}</span>
               </div>
             )}
-
-            {/* Instant Demo Student Login Section */}
-            <div className="mb-6 p-3.5 sm:p-4.5 rounded-2xl bg-[#F4F8FD] border border-[#E8F3FF] text-left">
-              <div className="flex items-center justify-between mb-3 gap-2">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0866C6]">
-                  <Sparkles className="w-4 h-4 text-[#0866C6] shrink-0" />
-                  <span>Instant 1-Click Demo Login</span>
-                </span>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-[#64778C] whitespace-nowrap">
-                  No credentials needed
-                </span>
-              </div>
-
-              {/* Persona Selector Tabs */}
-              <div className="grid grid-cols-3 gap-1.5 mb-3">
-                {DEMO_STUDENT_ROSTER.map((demo) => (
-                  <button
-                    key={demo.id}
-                    type="button"
-                    onClick={() => setSelectedDemoId(demo.id)}
-                    className={`p-1.5 sm:p-2 rounded-xl text-center text-xs transition-all border cursor-pointer ${
-                      selectedDemoId === demo.id
-                        ? 'bg-white border-[#0866C6] text-[#0866C6] font-bold shadow-xs'
-                        : 'bg-transparent border-transparent text-[#64778C] hover:text-[#062B50]'
-                    }`}
-                  >
-                    <div className="truncate font-bold text-[11px] sm:text-xs">{demo.fullName.split(' ')[0]}</div>
-                    <div className="text-[10px] opacity-75">{demo.classGrade}</div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Selected Persona Detail & Actions */}
-              {(() => {
-                const selected =
-                  DEMO_STUDENT_ROSTER.find((d) => d.id === selectedDemoId) || DEMO_STUDENT_ROSTER[0];
-                return (
-                  <div>
-                    <div className="bg-white p-3 rounded-xl border border-[#E8F3FF] mb-3 text-xs">
-                      <div className="flex items-center justify-between font-bold text-[#062B50] mb-0.5 gap-2">
-                        <span className="break-words">{selected.fullName}</span>
-                        <span className="text-[#0866C6] text-[11px] shrink-0">{selected.classGrade}</span>
-                      </div>
-                      <p className="text-[11px] text-[#64778C] break-words mb-2 leading-tight">{selected.schoolName}</p>
-                      <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-[#F4F8FD]">
-                        <span className="text-[#64778C]">Self-Reflection Portal</span>
-                        <span className="font-semibold text-[#0866C6]">
-                          14 Questions
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleDemoSignIn(selected.id)}
-                        disabled={isDemoLoading !== null}
-                        className="w-full min-h-[42px] px-3 rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-                      >
-                        {isDemoLoading === selected.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Sparkles className="w-3.5 h-3.5" />
-                        )}
-                        <span>1-Click Sign In</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleAutoFillDemo(selected)}
-                        className="w-full min-h-[42px] px-3 rounded-xl bg-white text-[#062B50] border border-[#062B50]/15 font-semibold text-xs hover:bg-[#F4F8FD] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <RefreshCw className="w-3.5 h-3.5 text-[#64778C]" />
-                        <span>Auto-fill Form</span>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Divider */}
-            <div className="relative mb-5">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-[#E8F3FF]" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="bg-white px-3 text-[#64778C] font-semibold">
-                  or sign in with student mobile number
-                </span>
-              </div>
-            </div>
 
             {/* Credentials Login Form */}
             <form onSubmit={handleSubmit} className="space-y-4 text-left" noValidate>
@@ -578,7 +438,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
         onClose={() => setShowForgotPasswordModal(false)}
         title="Reset Student Password"
         badgeText="DeRote Support"
-        description="For student privacy, passwords can be reset directly through an authorized DeRote administrator or mentor. If you are exploring the system, use the 1-Click Demo Login above (Aarav, Ananya, or Rohan with password 'demo123')."
+        description="For student privacy and account integrity, passwords can be reset directly through your school coordinator or by contacting DeRote Support at contact@derote.in."
         actionText="Back to sign in"
         onAction={() => setShowForgotPasswordModal(false)}
       />

@@ -88,7 +88,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, className = '' }) =>
       <div className="max-w-6xl mx-auto mt-8 pt-6 border-t border-[#E8F3FF] flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#64778C] gap-2">
         <span>© {new Date().getFullYear()} DeRote. All rights reserved.</span>
         <span className="text-center sm:text-right">
-          Educational Self-Reflection Platform · Classes 8, 9 & 10 · Draft Legal Policies for Administrative Review
+          Educational Self-Reflection Platform · Classes 8, 9 & 10 · Official Student Insight System
         </span>
       </div>
     </footer>

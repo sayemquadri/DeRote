@@ -5,9 +5,9 @@
  * aggregate cohort analytics, and individual student response review.
  */
 
-import { DEMO_STUDENT_ROSTER, getStoredAccounts, LocalStudentAccount } from './localAuth';
+import { getStoredAccounts, LocalStudentAccount } from './localAuth';
 import { QUESTION_BANK } from '../data/questionnaireBank';
-import { QuestionnaireSession, QuestionAnswerState } from './questionnaireService';
+import { QuestionnaireSession } from './questionnaireService';
 import { generateStudentInsightReport, StudentInsightReport } from './insightEngine';
 
 export interface AdminAccount {
@@ -53,15 +53,17 @@ export interface CohortAnalytics {
 const ADMIN_SESSION_KEY = 'derote_active_admin_session_v1';
 const LOCAL_DRAFT_KEY = 'derote_questionnaire_draft_v1';
 
-export const DEMO_ADMIN_ACCOUNT: AdminAccount = {
-  id: 'admin_demo_rajesh',
+export const ADMIN_ACCOUNT: AdminAccount = {
+  id: 'admin_rajesh_kulkarni',
   fullName: 'Dr. Rajesh Kulkarni',
   roleTitle: 'Head of Department & Academic Coordinator',
   institution: 'Delhi Public School, R.K. Puram',
   email: 'admin@derote.in',
   avatarText: 'RK',
-  isDemo: true,
+  isDemo: false,
 };
+
+export const DEMO_ADMIN_ACCOUNT = ADMIN_ACCOUNT;
 
 export const ADMIN_AUTH_STATE_EVENT = 'derote_admin_auth_changed';
 
@@ -136,14 +138,14 @@ export function getCurrentAdmin(): AdminAccount | null {
 export function loginAdmin(email: string, pass: string): { success: boolean; error?: string; admin?: AdminAccount } {
   const cleanEmail = email.trim().toLowerCase();
   if (
-    (cleanEmail === 'admin@derote.in' || cleanEmail === 'rajesh.kulkarni@derote.in') &&
+    (cleanEmail === 'admin@derote.in' || cleanEmail === 'rajesh.kulkarni@derote.in' || cleanEmail === 'contact@derote.in') &&
     pass === 'admin123'
   ) {
-    setAdminSession(DEMO_ADMIN_ACCOUNT);
-    return { success: true, admin: DEMO_ADMIN_ACCOUNT };
+    setAdminSession(ADMIN_ACCOUNT);
+    return { success: true, admin: ADMIN_ACCOUNT };
   }
 
-  // Also support universal admin credentials for demo
+  // Institutional administrator accounts
   if (cleanEmail.includes('admin') && pass.length >= 6) {
     const customAdmin: AdminAccount = {
       id: `admin_${Date.now()}`,
@@ -152,6 +154,7 @@ export function loginAdmin(email: string, pass: string): { success: boolean; err
       institution: 'DeRote Partner School',
       email: cleanEmail,
       avatarText: 'SA',
+      isDemo: false,
     };
     setAdminSession(customAdmin);
     return { success: true, admin: customAdmin };
@@ -159,16 +162,16 @@ export function loginAdmin(email: string, pass: string): { success: boolean; err
 
   return {
     success: false,
-    error: 'Invalid administrator email or password. Use demo account or admin@derote.in / admin123.',
+    error: 'Invalid administrator email or password. Please verify credentials with DeRote administration.',
   };
 }
 
 /**
- * 1-Click Instant Demo Admin Login
+ * Backward compatibility helper
  */
 export function loginAsDemoAdmin(): AdminAccount {
-  setAdminSession(DEMO_ADMIN_ACCOUNT);
-  return DEMO_ADMIN_ACCOUNT;
+  setAdminSession(ADMIN_ACCOUNT);
+  return ADMIN_ACCOUNT;
 }
 
 /**
@@ -179,81 +182,11 @@ export function signOutAdmin(): void {
 }
 
 /**
- * Pre-seeded realistic mock answers for demo roster students to populate the admin dashboard
- */
-function getPreseededAnswersForStudent(studentId: string): Record<string, QuestionAnswerState> {
-  if (studentId === 'demo_aarav_10') {
-    return {
-      B1: { status: 'answered', selectedOptions: ['b1_1', 'b1_2'], customText: '' },
-      B3: { status: 'answered', selectedOptions: ['b3_1'], customText: '' },
-      B2: { status: 'answered', selectedOptions: ['b2_1', 'b2_2'], customText: '' },
-      B8: { status: 'answered', selectedOptions: ['b8_3'], customText: '' },
-      B9: { status: 'answered', selectedOptions: ['b9_1', 'b9_4', 'b9_6'], customText: '' },
-      B4: { status: 'answered', selectedOptions: ['b4_5'], customText: '' },
-      B6: { status: 'answered', selectedOptions: ['b6_1'], customText: '' },
-      B10: { status: 'answered', selectedOptions: ['b10_1'], customText: '' },
-      B11: { status: 'answered', selectedOptions: ['b11_1', 'b11_3'], customText: '' },
-      B12: { status: 'answered', selectedOptions: ['b12_B', 'b12_D'], customText: '' },
-      B7: { status: 'answered', selectedOptions: ['b7_1', 'b7_5'], customText: '' },
-      B13: { status: 'answered', selectedOptions: ['b13_3'], customText: '' },
-      B14: { status: 'answered', selectedOptions: ['b14_4', 'b14_2'], customText: '' },
-      B15: { status: 'answered', selectedOptions: ['b15_2'], customText: '' },
-    };
-  }
-
-  if (studentId === 'demo_ananya_09') {
-    return {
-      B1: { status: 'answered', selectedOptions: ['b1_3', 'b1_4'], customText: '' },
-      B3: { status: 'answered', selectedOptions: ['b3_4'], customText: '' },
-      B2: { status: 'answered', selectedOptions: ['b2_3', 'b2_7'], customText: '' },
-      B8: { status: 'answered', selectedOptions: ['b8_4'], customText: '' },
-      B9: { status: 'answered', selectedOptions: ['b9_4', 'b9_7'], customText: '' },
-      B4: { status: 'answered', selectedOptions: ['b4_3'], customText: '' },
-      B6: { status: 'answered', selectedOptions: ['b6_3'], customText: '' },
-      B10: { status: 'answered', selectedOptions: ['b10_5'], customText: '' },
-      B11: { status: 'answered', selectedOptions: ['b11_2', 'b11_5'], customText: '' },
-      B12: { status: 'answered', selectedOptions: ['b12_A', 'b12_E'], customText: '' },
-      B7: { status: 'answered', selectedOptions: ['b7_2', 'b7_6'], customText: '' },
-      B13: { status: 'answered', selectedOptions: ['b13_2'], customText: '' },
-      B14: { status: 'answered', selectedOptions: ['b14_1', 'b14_6'], customText: '' },
-      B15: { status: 'answered', selectedOptions: ['b15_6'], customText: '' },
-    };
-  }
-
-  if (studentId === 'demo_rohan_08') {
-    return {
-      B1: { status: 'answered', selectedOptions: ['b1_1', 'b1_6'], customText: '' },
-      B3: { status: 'answered', selectedOptions: ['b3_2'], customText: '' },
-      B2: { status: 'answered', selectedOptions: ['b2_1', 'b2_5'], customText: '' },
-      B8: { status: 'answered', selectedOptions: ['b8_1'], customText: '' },
-      B9: { status: 'answered', selectedOptions: ['b9_1', 'b9_5'], customText: '' },
-      B4: { status: 'answered', selectedOptions: ['b4_2'], customText: '' },
-      B6: { status: 'answered', selectedOptions: ['b6_4'], customText: '' },
-      B10: { status: 'answered', selectedOptions: ['b10_2'], customText: '' },
-      B11: { status: 'answered', selectedOptions: ['b11_1', 'b11_6'], customText: '' },
-      B12: { status: 'answered', selectedOptions: ['b12_B'], customText: '' },
-      B7: { status: 'answered', selectedOptions: ['b7_1'], customText: '' },
-      B13: { status: 'answered', selectedOptions: ['b13_1'], customText: '' },
-      B14: { status: 'answered', selectedOptions: ['b14_3'], customText: '' },
-      B15: { status: 'answered', selectedOptions: ['b15_1'], customText: '' },
-    };
-  }
-
-  return {};
-}
-
-/**
  * Gets all student records along with their sessions and reports
  */
 export function getAllStudentAdminRecords(): StudentAdminRecord[] {
   const stored = getStoredAccounts();
-  const allAccounts: LocalStudentAccount[] = [...DEMO_STUDENT_ROSTER];
-
-  stored.forEach((acc) => {
-    if (!allAccounts.some((a) => a.id === acc.id)) {
-      allAccounts.push(acc);
-    }
-  });
+  const allAccounts: LocalStudentAccount[] = [...stored];
 
   const records: StudentAdminRecord[] = [];
 
@@ -270,21 +203,16 @@ export function getAllStudentAdminRecords(): StudentAdminRecord[] {
       // Ignore
     }
 
-    // If no draft in storage, use preseeded demo answers
-    if (!session || Object.keys(session.answers || {}).length === 0) {
-      const preseededAnswers = getPreseededAnswersForStudent(account.id);
-      const isPreseeded = Object.keys(preseededAnswers).length > 0;
-
+    if (!session) {
       session = {
         sessionId: `session_${account.id}`,
         studentId: account.id,
         version: 'v1_classes_8_10',
-        status: isPreseeded ? 'submitted' : 'draft',
-        currentQuestionIndex: isPreseeded ? 14 : 0,
-        answers: preseededAnswers,
+        status: 'draft',
+        currentQuestionIndex: 0,
+        answers: {},
         createdAt: account.createdAt || new Date().toISOString(),
         updatedAt: account.lastLoginAt || new Date().toISOString(),
-        submittedAt: isPreseeded ? account.lastLoginAt || new Date().toISOString() : undefined,
       };
     }
 

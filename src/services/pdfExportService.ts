@@ -117,7 +117,7 @@ export function exportCohortReportPdf(
   const stats = [
     { label: 'TOTAL STUDENTS', value: `${analytics.totalStudents}`, sub: 'Enrolled cohort' },
     { label: 'COMPLETED', value: `${analytics.completedAssessments}`, sub: `${analytics.completionRate}% completion` },
-    { label: 'IN PROGRESS', value: `${analytics.inProgressAssessments}`, sub: 'Working drafts' },
+    { label: 'IN PROGRESS', value: `${analytics.inProgressAssessments}`, sub: 'In-progress' },
     {
       label: 'CLASSES 8, 9, 10',
       value: `${analytics.classBreakdown.class8} / ${analytics.classBreakdown.class9} / ${analytics.classBreakdown.class10}`,
@@ -256,7 +256,7 @@ export function exportCohortReportPdf(
     } else {
       doc.setTextColor(COLOR_AMBER[0], COLOR_AMBER[1], COLOR_AMBER[2]);
       doc.setFont('helvetica', 'bold');
-      doc.text('Draft', MARGIN_LEFT + 70, y + 4.2);
+      doc.text('In Progress', MARGIN_LEFT + 70, y + 4.2);
     }
 
     doc.setFont('helvetica', 'normal');

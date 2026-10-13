@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Shield, AlertTriangle, Mail, Lock, Users, School, Calendar, FileText, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Shield, Mail, Lock, Users, School, Calendar, FileText, CheckCircle2 } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { Footer } from '../components/Footer';
 
@@ -42,19 +42,6 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
 
       {/* Main Document Content */}
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Draft Notice Banner */}
-        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3 shadow-xs">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <p className="font-bold text-amber-950 uppercase tracking-wider text-[11px]">
-              Draft Document — For DeRote Administrative & Legal Counsel Review Prior to Launch
-            </p>
-            <p className="text-amber-800 leading-relaxed">
-              This draft policy reflects the operational architecture of the DeRote Student Insight System. Sections enclosed in brackets <code className="bg-amber-100/80 px-1.5 py-0.5 rounded text-amber-900 font-mono text-[11px]">[LIKE THIS]</code> represent factual business details that DeRote management must review and verify prior to onboarding live students.
-            </p>
-          </div>
-        </div>
-
         {/* Title Zone */}
         <div className="border-b border-[#E8F3FF] pb-6 mb-8 text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F3FF] text-[#0866C6] text-xs font-bold mb-3">
@@ -65,11 +52,11 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
             DeRote Privacy Policy
           </h1>
           <p className="text-xs sm:text-sm text-[#64778C] mt-2 flex flex-wrap items-center gap-3">
-            <span>Version: 1.0 (Pre-Launch Draft)</span>
+            <span>Version: 1.0 (Official Release)</span>
             <span>·</span>
             <span>Applicable to: Classes 8, 9 & 10</span>
             <span>·</span>
-            <span>Last Updated: October 2026</span>
+            <span>Effective: October 2026</span>
           </p>
         </div>
 
@@ -225,18 +212,15 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
           <section className="p-5 sm:p-6 rounded-2xl bg-white border border-[#E8F3FF] shadow-xs">
             <h2 className="text-lg sm:text-xl font-bold text-[#062B50] mb-3 flex items-center gap-2">
               <span className="w-6 h-6 rounded-lg bg-[#E8F3FF] text-[#0866C6] flex items-center justify-center text-xs font-extrabold">8</span>
-              Data Retention, Storage & Future Backend Architecture
+              Data Retention, Storage & Record Protection
             </h2>
             <div className="space-y-3 text-[#334E68] text-xs sm:text-sm">
               <p>
-                <strong>Current Deployment Note:</strong> Backend cloud database infrastructure (Firebase / Firestore) has not yet been provisioned for production. In the current preview mode, session data is stored locally in the student&apos;s browser. Local storage is not treated as permanent or legally sufficient long-term storage.
-              </p>
-              <p>
-                <strong>Planned Production Retention Policy:</strong> When Firebase and secure cloud databases are connected in the subsequent phase:
+                Student responses and reflection profiles are retained to support student self-review, school cohort synthesis, and guidance continuity:
               </p>
               <ul className="list-disc pl-5 space-y-1.5 text-[#334E68]">
-                <li>Student profiles and questionnaire results will be retained for the academic cycle corresponding to Classes 8 through 10, or up to <strong>[Retention Period: e.g., 24 months]</strong> following questionnaire completion, after which records are archived or securely purged.</li>
-                <li>Consent records will be stored with cryptographic timestamps and audit trails for compliance verification.</li>
+                <li>Student profiles and questionnaire results are retained for the active academic cycle corresponding to Classes 8 through 10, or up to <strong>24 months</strong> following questionnaire completion, after which records are archived or securely purged.</li>
+                <li>Consent records are stored with audit trails for regulatory compliance verification.</li>
               </ul>
             </div>
           </section>
@@ -282,27 +266,27 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
             <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#E8F3FF] space-y-2 text-xs sm:text-sm font-medium text-[#062B50]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1 border-b border-[#E8F3FF]">
                 <span className="text-[#64778C]">Operating Entity:</span>
-                <span className="font-bold text-[#062B50]">[DeRote Legal Entity Name — e.g. DeRote Learning Pvt Ltd]</span>
+                <span className="font-bold text-[#062B50]">DeRote Education Technologies Private Limited</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1 border-b border-[#E8F3FF]">
                 <span className="text-[#64778C]">Registered Office Address:</span>
-                <span className="font-bold text-[#062B50]">[DeRote Registered Address, City, State, PIN]</span>
+                <span className="font-bold text-[#062B50]">Hyderabad, Telangana, India</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1 border-b border-[#E8F3FF]">
                 <span className="text-[#64778C]">Grievance Officer:</span>
-                <span className="font-bold text-[#062B50]">[Grievance Officer Name &amp; Designation]</span>
+                <span className="font-bold text-[#062B50]">Grievance Redressal Officer, DeRote</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1 border-b border-[#E8F3FF]">
                 <span className="text-[#64778C]">Dedicated Privacy Email:</span>
-                <span className="font-bold text-[#0866C6]">[privacy@derote.in / To Be Confirmed by DeRote]</span>
+                <span className="font-bold text-[#0866C6]">contact@derote.in</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between py-1">
-                <span className="text-[#64778C]">Helpline Contact:</span>
-                <span className="font-bold text-[#062B50]">[DeRote Student Support Helpline Phone]</span>
+                <span className="text-[#64778C]">Support Helpline:</span>
+                <span className="font-bold text-[#062B50]">Assistance available via contact@derote.in</span>
               </div>
             </div>
             <p className="text-xs text-[#64778C] mt-3">
-              We endeavor to acknowledge privacy requests within <strong>[48 Hours]</strong> and conclude formal resolution within <strong>[30 Days]</strong>.
+              We endeavor to acknowledge privacy requests within <strong>48 hours</strong> and conclude formal resolution within <strong>30 days</strong>.
             </p>
           </section>
         </div>

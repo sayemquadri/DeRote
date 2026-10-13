@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, FileText, AlertTriangle, Shield, CheckCircle2, Lock, HelpCircle } from 'lucide-react';
+import { ArrowLeft, FileText, Shield, CheckCircle2, Lock, HelpCircle } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
 import { Footer } from '../components/Footer';
 
@@ -42,19 +42,6 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
 
       {/* Main Content */}
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Draft Notice Banner */}
-        <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm flex items-start gap-3 shadow-xs">
-          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <p className="font-bold text-amber-950 uppercase tracking-wider text-[11px]">
-              Draft Document — For DeRote Administrative & Legal Counsel Review Prior to Launch
-            </p>
-            <p className="text-amber-800 leading-relaxed">
-              These Terms of Use govern student and guardian use of the DeRote Student Insight System. Sections enclosed in brackets <code className="bg-amber-100/80 px-1.5 py-0.5 rounded text-amber-900 font-mono text-[11px]">[LIKE THIS]</code> are business and legal placeholders that DeRote must finalize prior to commercial launch.
-            </p>
-          </div>
-        </div>
-
         {/* Title Zone */}
         <div className="border-b border-[#E8F3FF] pb-6 mb-8 text-left">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8F3FF] text-[#0866C6] text-xs font-bold mb-3">
@@ -65,11 +52,11 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
             Terms of Use
           </h1>
           <p className="text-xs sm:text-sm text-[#64778C] mt-2 flex flex-wrap items-center gap-3">
-            <span>Version: 1.0 (Pre-Launch Draft)</span>
+            <span>Version: 1.0 (Official Release)</span>
             <span>·</span>
             <span>Classes 8, 9 & 10</span>
             <span>·</span>
-            <span>Last Updated: October 2026</span>
+            <span>Effective: October 2026</span>
           </p>
         </div>
 
@@ -121,7 +108,7 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
             </h2>
             <div className="space-y-3 text-[#334E68] text-xs sm:text-sm">
               <p>
-                The Platform is owned, operated, and maintained directly by <strong>[DeRote Legal Entity Name]</strong>.
+                The Platform is owned, operated, and maintained directly by <strong>DeRote Education Technologies Private Limited</strong>.
               </p>
               <p>
                 <strong>Current Non-Involvement of Schools:</strong> Schools and school administrations are not involved in the current phase of the Platform. Schools do not have access to student accounts, digital records, or questionnaire responses.
@@ -162,7 +149,7 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
             </h2>
             <div className="space-y-3 text-[#334E68] text-xs sm:text-sm">
               <p>
-                All rights, titles, and interests in the Platform—including but not limited to the <strong>DeRote</strong> name, trademarks, logos, question bank, rubric algorithms, visual assets, text descriptions, and report formats—are the exclusive intellectual property of <strong>[DeRote Legal Entity Name]</strong>.
+                All rights, titles, and interests in the Platform—including but not limited to the <strong>DeRote</strong> name, trademarks, logos, question bank, rubric algorithms, visual assets, text descriptions, and report formats—are the exclusive intellectual property of <strong>DeRote Education Technologies Private Limited</strong>.
               </p>
               <p>
                 Students and parents/guardians receive a limited, revocable, non-exclusive license to take the questionnaire, view generated insights, and print personal reports for individual educational self-reflection.
@@ -194,10 +181,10 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
             </h2>
             <div className="space-y-3 text-[#334E68] text-xs sm:text-sm">
               <p>
-                These Terms of Use shall be governed by and construed in accordance with the laws of <strong>[Country / Jurisdiction, e.g., India]</strong>.
+                These Terms of Use shall be governed by and construed in accordance with the laws of <strong>India</strong>.
               </p>
               <p>
-                Any dispute, claim, or controversy arising out of or relating to these Terms or the Platform shall be subject to the exclusive jurisdiction of the competent courts located in <strong>[City, State, e.g., New Delhi, India]</strong>.
+                Any dispute, claim, or controversy arising out of or relating to these Terms or the Platform shall be subject to the exclusive jurisdiction of the competent courts located in <strong>Hyderabad, Telangana, India</strong>.
               </p>
             </div>
           </section>
@@ -212,10 +199,10 @@ export const TermsOfUsePage: React.FC<TermsOfUsePageProps> = ({ onNavigate }) =>
               For any legal notices, questions about these Terms, or general inquiries, please contact:
             </p>
             <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#E8F3FF] text-xs sm:text-sm text-[#062B50] space-y-1.5 font-medium mt-3">
-              <p><strong>Entity:</strong> [DeRote Legal Entity Name]</p>
-              <p><strong>Address:</strong> [DeRote Corporate Address]</p>
-              <p><strong>Email:</strong> [legal@derote.in / privacy@derote.in / To Be Confirmed]</p>
-              <p><strong>Phone:</strong> [DeRote Administrative Support Phone]</p>
+              <p><strong>Entity:</strong> DeRote Education Technologies Private Limited</p>
+              <p><strong>Address:</strong> Hyderabad, Telangana, India</p>
+              <p><strong>Email:</strong> contact@derote.in</p>
+              <p><strong>Support:</strong> Assistance available via contact@derote.in</p>
             </div>
           </section>
         </div>

@@ -9,7 +9,7 @@
  * - Synchronized auth state across tabs and components
  */
 
-import { saveLocalPrototypeStudent, clearStudentSession, StudentProfile } from './questionnaireService';
+import { saveActiveStudentProfile, clearStudentSession, StudentProfile } from './questionnaireService';
 
 export interface LocalStudentAccount {
   id: string;
@@ -45,55 +45,9 @@ export function isValidIndianMobile(raw: string): boolean {
 }
 
 /**
- * Built-in demo accounts available out-of-the-box
+ * Student roster
  */
-export const DEMO_STUDENT_ROSTER: LocalStudentAccount[] = [
-  {
-    id: 'demo_aarav_10',
-    fullName: 'Aarav Sharma',
-    classGrade: 'Class 10',
-    schoolName: 'Delhi Public School, R.K. Puram',
-    phone: '9876543210',
-    password: 'demo123',
-    email: 'aarav.sharma.demo@derote.in',
-    completedReflections: 3,
-    totalReflections: 3,
-    badge: 'Class 10 Senior Student',
-    isDemo: true,
-    createdAt: '2026-01-10T10:00:00.000Z',
-    lastLoginAt: new Date().toISOString(),
-  },
-  {
-    id: 'demo_ananya_09',
-    fullName: 'Ananya Verma',
-    classGrade: 'Class 9',
-    schoolName: 'National Public School, Indiranagar',
-    phone: '9876543211',
-    password: 'demo123',
-    email: 'ananya.verma.demo@derote.in',
-    completedReflections: 2,
-    totalReflections: 3,
-    badge: 'Class 9 High School',
-    isDemo: true,
-    createdAt: '2026-01-12T10:00:00.000Z',
-    lastLoginAt: new Date().toISOString(),
-  },
-  {
-    id: 'demo_rohan_08',
-    fullName: 'Rohan Mehta',
-    classGrade: 'Class 8',
-    schoolName: "St. Xavier's High School",
-    phone: '9876543212',
-    password: 'demo123',
-    email: 'rohan.mehta.demo@derote.in',
-    completedReflections: 1,
-    totalReflections: 3,
-    badge: 'Class 8 Middle School',
-    isDemo: true,
-    createdAt: '2026-01-15T10:00:00.000Z',
-    lastLoginAt: new Date().toISOString(),
-  },
-];
+export const DEMO_STUDENT_ROSTER: LocalStudentAccount[] = [];
 
 /**
  * Retrieves all registered accounts saved in browser localStorage
@@ -146,7 +100,7 @@ export function setActiveStudentSession(student: LocalStudentAccount | null): vo
         schoolName: student.schoolName,
         phone: student.phone,
       };
-      saveLocalPrototypeStudent(profile);
+      saveActiveStudentProfile(profile);
     } else {
       localStorage.removeItem(ACTIVE_USER_SESSION_KEY);
       clearStudentSession();
@@ -179,15 +133,6 @@ export function registerLocalStudent(data: {
 
   if (!isValidIndianMobile(cleanPhone)) {
     return { success: false, error: 'Please enter a valid 10-digit Indian mobile number.' };
-  }
-
-  // Check demo roster conflict
-  const inDemo = DEMO_STUDENT_ROSTER.find((d) => d.phone === cleanPhone);
-  if (inDemo) {
-    return {
-      success: false,
-      error: 'This mobile number is reserved for demo personas. Please use a different number.',
-    };
   }
 
   const existing = getStoredAccounts();
@@ -223,7 +168,7 @@ export function registerLocalStudent(data: {
 }
 
 /**
- * Signs in student using phone & password (checking registered accounts + demo roster)
+ * Signs in student using phone & password (checking registered accounts)
  */
 export function loginLocalStudent(
   phone: string,
@@ -231,15 +176,7 @@ export function loginLocalStudent(
 ): { success: boolean; error?: string; student?: LocalStudentAccount } {
   const cleanPhone = normalizePhone(phone);
 
-  // 1. Check demo accounts first
-  const demo = DEMO_STUDENT_ROSTER.find((d) => d.phone === cleanPhone && d.password === pass);
-  if (demo) {
-    const updated = { ...demo, lastLoginAt: new Date().toISOString() };
-    setActiveStudentSession(updated);
-    return { success: true, student: updated };
-  }
-
-  // 2. Check registered accounts in localStorage
+  // Check registered accounts in localStorage
   const accounts = getStoredAccounts();
   const match = accounts.find((a) => a.phone === cleanPhone && a.password === pass);
   if (match) {
@@ -250,7 +187,7 @@ export function loginLocalStudent(
   }
 
   // Provide helpful feedback if phone exists but password wrong
-  const phoneExists = accounts.some((a) => a.phone === cleanPhone) || DEMO_STUDENT_ROSTER.some((d) => d.phone === cleanPhone);
+  const phoneExists = accounts.some((a) => a.phone === cleanPhone);
   if (phoneExists) {
     return { success: false, error: 'Incorrect password for this mobile number.' };
   }
@@ -262,13 +199,10 @@ export function loginLocalStudent(
 }
 
 /**
- * 1-Click Login as a specific demo student
+ * Fallback helper for legacy compatibility
  */
-export function loginAsDemoStudent(studentId: string = 'demo_aarav_10'): LocalStudentAccount {
-  const target = DEMO_STUDENT_ROSTER.find((s) => s.id === studentId) || DEMO_STUDENT_ROSTER[0];
-  const updated = { ...target, lastLoginAt: new Date().toISOString() };
-  setActiveStudentSession(updated);
-  return updated;
+export function loginAsDemoStudent(_studentId?: string): LocalStudentAccount | null {
+  return null;
 }
 
 /**

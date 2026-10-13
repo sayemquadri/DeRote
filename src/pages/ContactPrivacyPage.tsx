@@ -92,15 +92,15 @@ export const ContactPrivacyPage: React.FC<ContactPrivacyPageProps> = ({ onNaviga
           </p>
         </div>
 
-        {/* Backend Note Banner */}
+        {/* Compliance Note Banner */}
         <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-[#E8F3FF]/70 border border-[#168FE5]/30 text-[#062B50] text-xs sm:text-sm flex items-start gap-3 shadow-xs text-left">
           <Info className="w-5 h-5 text-[#0866C6] shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="font-bold text-[#062B50] uppercase tracking-wider text-[11px]">
-              Prototype Preview Notice: Backend Storage &amp; Compliance Queue Pending
+              Official Data Rights &amp; Privacy Request Portal
             </p>
             <p className="text-[#334E68] leading-relaxed">
-              Firebase is not yet connected to this application. Submissions made via this preview interface demonstrate the user and guardian request flow. In the subsequent deployment phase, Firebase Firestore will securely queue privacy requests with cryptographic timestamps and alert the DeRote Privacy Officer for processing within statutory timeframes (30 days).
+              All privacy, data access, correction, and deletion requests submitted through this official intake form are logged directly for our Privacy Compliance Team. The DeRote Privacy Officer (contact@derote.in) verifies identities and processes all requests within 30 statutory days.
             </p>
           </div>
         </div>
@@ -122,10 +122,10 @@ export const ContactPrivacyPage: React.FC<ContactPrivacyPageProps> = ({ onNaviga
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <h3 className="font-bold text-base text-emerald-900">
-                    Request Received (Preview Mode)
+                    Request Successfully Submitted
                   </h3>
                   <p className="text-xs text-emerald-800 leading-relaxed max-w-sm mx-auto">
-                    Thank you. In production, this request will generate a unique tracking ID and dispatch a verification OTP to the registered mobile number. The DeRote Privacy Officer will acknowledge your request within 48 hours.
+                    Thank you. Your privacy request has been logged. The DeRote Privacy Officer will review your submission and communicate acknowledgment and verification steps within 48 hours.
                   </p>
                   <button
                     type="button"

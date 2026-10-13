@@ -36,7 +36,7 @@ export default function App() {
       matchRoute('/prototype') ||
       matchRoute('/questionnaire')
     ) {
-      return '/prototype';
+      return '/questionnaire';
     }
     return '/';
   };
@@ -77,7 +77,7 @@ export default function App() {
         matchRoute('/prototype') ||
         matchRoute('/questionnaire')
       ) {
-        setCurrentRoute('/prototype');
+        setCurrentRoute('/questionnaire');
       } else {
         setCurrentRoute('/');
       }

@@ -4,20 +4,11 @@ import {
   ArrowLeft,
   Lock,
   Mail,
-  Sparkles,
-  ChevronRight,
   AlertCircle,
   Building2,
-  Users,
-  CheckCircle2,
-  KeyRound,
 } from 'lucide-react';
 import { DeRoteWordmark } from '../components/DeRoteWordmark';
-import {
-  loginAdmin,
-  loginAsDemoAdmin,
-  DEMO_ADMIN_ACCOUNT,
-} from '../services/adminService';
+import { loginAdmin } from '../services/adminService';
 
 interface AdminLoginPageProps {
   onNavigate: (route: string) => void;
@@ -53,22 +44,6 @@ export function AdminLoginPage({
         setErrorAlert(res.error || 'Authentication failed. Please verify credentials.');
       }
     }, 150);
-  };
-
-  const handleDemoLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      loginAsDemoAdmin();
-      setIsLoading(false);
-      if (onAdminLoginSuccess) onAdminLoginSuccess();
-      onNavigate('/admin');
-    }, 150);
-  };
-
-  const handleFillDemoCredentials = () => {
-    setEmail('admin@derote.in');
-    setPassword('admin123');
-    setErrorAlert(null);
   };
 
   return (
@@ -127,44 +102,6 @@ export function AdminLoginPage({
             </p>
           </div>
 
-          {/* 1-Click Demo Admin Card */}
-          <div className="mb-6 p-4 rounded-2xl bg-[#F0F7FF] border border-[#D5E9FF] text-left">
-            <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0866C6]">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>1-Click Instant Demo Login</span>
-              </span>
-              <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">
-                Pre-configured
-              </span>
-            </div>
-
-            <p className="text-xs text-[#465B72] mb-3">
-              Explore with <strong>{DEMO_ADMIN_ACCOUNT.fullName}</strong> ({DEMO_ADMIN_ACCOUNT.roleTitle}).
-            </p>
-
-            <button
-              type="button"
-              onClick={handleDemoLogin}
-              disabled={isLoading}
-              className="w-full py-2.5 px-4 rounded-xl bg-[#0866C6] text-white font-bold text-xs hover:bg-[#062B50] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
-            >
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>Launch Demo Admin Dashboard</span>
-              <ChevronRight className="w-3.5 h-3.5 ml-auto" />
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative my-6 text-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#E8F3FF]" />
-            </div>
-            <span className="relative bg-white px-3 text-xs font-semibold text-[#64778C]">
-              or sign in with credentials
-            </span>
-          </div>
-
           {/* Error Alert */}
           {errorAlert && (
             <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-start gap-2 text-left">
@@ -196,13 +133,6 @@ export function AdminLoginPage({
                 <label className="block text-xs font-bold text-[#062B50]">
                   Password
                 </label>
-                <button
-                  type="button"
-                  onClick={handleFillDemoCredentials}
-                  className="text-[11px] font-semibold text-[#0866C6] hover:text-[#062B50] hover:underline cursor-pointer"
-                >
-                  Auto-fill demo credentials
-                </button>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#64778C] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -213,10 +143,6 @@ export function AdminLoginPage({
                   placeholder="••••••••"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#D5E9FF] bg-white text-xs text-[#062B50] placeholder-[#64778C]/60 focus:outline-none focus:ring-2 focus:ring-[#0866C6]/30 focus:border-[#0866C6] transition-all"
                 />
-              </div>
-              <div className="flex items-center justify-between text-[10px] text-[#64778C] mt-1">
-                <span>Demo user: admin@derote.in</span>
-                <span>Demo pass: admin123</span>
               </div>
             </div>
 

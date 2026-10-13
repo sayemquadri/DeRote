@@ -1,7 +1,6 @@
 import React from 'react';
-import { ArrowRight, Compass, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, Compass, ShieldCheck } from 'lucide-react';
 import { FlowingBlueRibbons } from '../components/FlowingBlueRibbons';
-import { loginAsDemoStudent } from '../services/localAuth';
 import { Footer } from '../components/Footer';
 import step2Art from '../assets/images/22.png';
 import step1Art from '../assets/images/1.png';
@@ -77,21 +76,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 className="w-full sm:w-auto min-h-[48px] px-6 py-2.5 rounded-2xl text-sm sm:text-base font-bold text-[#062B50] hover:text-[#0866C6] hover:bg-[#F4F8FD] active:bg-[#E8F3FF] transition-colors flex items-center justify-center text-center cursor-pointer border border-[#E8F3FF]"
               >
                 Already have an account? Sign in
-              </button>
-            </div>
-
-            {/* 1-Click Demo Quick Access Pill */}
-            <div className="mb-5">
-              <button
-                type="button"
-                onClick={() => {
-                  loginAsDemoStudent('demo_aarav_10');
-                  onNavigate('/questionnaire');
-                }}
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#0866C6] hover:text-[#062B50] bg-[#E8F3FF] hover:bg-[#168FE5]/20 border border-[#168FE5]/30 rounded-xl px-4 py-2 transition-all cursor-pointer shadow-xs focus-visible:outline-2 focus-visible:outline-[#0866C6]"
-              >
-                <Sparkles className="w-4 h-4 text-[#0866C6]" />
-                <span>Try 1-Click Demo Student (Aarav • Class 10)</span>
               </button>
             </div>
 

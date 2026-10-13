@@ -218,9 +218,9 @@ export const submitQuestionnaireResponses = async (
 };
 
 /**
- * Handles prototype/local student login session storage
+ * Handles student session storage
  */
-export const saveLocalPrototypeStudent = (profile: StudentProfile): void => {
+export const saveActiveStudentProfile = (profile: StudentProfile): void => {
   try {
     localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(profile));
   } catch {
@@ -228,7 +228,7 @@ export const saveLocalPrototypeStudent = (profile: StudentProfile): void => {
   }
 };
 
-export const getLocalPrototypeStudent = (): StudentProfile | null => {
+export const getActiveStudentProfile = (): StudentProfile | null => {
   try {
     const raw = localStorage.getItem(LOCAL_SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -236,6 +236,9 @@ export const getLocalPrototypeStudent = (): StudentProfile | null => {
     return null;
   }
 };
+
+export const saveLocalPrototypeStudent = saveActiveStudentProfile;
+export const getLocalPrototypeStudent = getActiveStudentProfile;
 
 export const clearStudentSession = (): void => {
   try {
