@@ -8,7 +8,9 @@ import {
 import {
   onAdminAuthChange,
   AdminAccount,
+  MASTER_ADMIN_UID,
 } from '../services/adminService';
+import { auth } from '../services/firebase';
 
 interface NavigationProps {
   onNavigate: (route: string) => void;
@@ -32,7 +34,12 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
     };
   }, []);
 
-  const isSuperAdmin = currentAdmin?.email === 'contact@derote.in';
+  const isSuperAdmin =
+    currentAdmin?.id === MASTER_ADMIN_UID ||
+    currentAdmin?.email === 'contact@derote.in' ||
+    auth.currentUser?.uid === MASTER_ADMIN_UID ||
+    auth.currentUser?.email === 'contact@derote.in' ||
+    activeStudent?.id === MASTER_ADMIN_UID;
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#E8F3FF] transition-colors">
@@ -75,7 +82,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
               <button
                 onClick={() => onNavigate('/questionnaire')}
                 type="button"
-                className="inline-flex items-center gap-1 min-h-[38px] sm:min-h-[40px] px-2.5 sm:px-3 py-1.5 text-xs font-bold text-[#062B50] hover:text-[#0866C6] bg-white hover:bg-[#F4F8FD] border border-[#E8F3FF] rounded-xl transition-colors cursor-pointer shadow-xs focus-visible:outline-2 focus-visible:outline-[#0866C6] whitespace-nowrap"
+                className="inline-flex items-center min-h-[38px] sm:min-h-[40px] px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold text-[#062B50] hover:text-[#0866C6] transition-colors cursor-pointer rounded-lg focus-visible:outline-2 focus-visible:outline-[#0866C6] whitespace-nowrap"
                 title="Self-Reflection Assessment"
               >
                 <span>Questionnaire</span>
@@ -84,7 +91,7 @@ export const Navigation: React.FC<NavigationProps> = ({ onNavigate, currentRoute
               <button
                 onClick={() => onNavigate('/login')}
                 type="button"
-                className="min-h-[38px] sm:min-h-[44px] px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold text-white bg-[#0866C6] hover:bg-[#062B50] rounded-xl transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0866C6] whitespace-nowrap"
+                className="min-h-[38px] sm:min-h-[42px] px-4 sm:px-6 py-2 text-xs sm:text-sm font-bold text-white bg-[#0866C6] hover:bg-[#062B50] rounded-xl transition-all shadow-sm active:scale-[0.98] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0866C6] whitespace-nowrap"
               >
                 Sign in
               </button>

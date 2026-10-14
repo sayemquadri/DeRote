@@ -67,6 +67,7 @@ export interface CohortAnalytics {
 }
 
 export const PRIMARY_ADMIN_UID = 'contact@derote.in';
+export const MASTER_ADMIN_UID = 'HRmNP5WPw5fXtihxIVB2nkcCTkz1';
 
 export const ADMIN_ACCOUNT: AdminAccount = {
   id: PRIMARY_ADMIN_UID,
@@ -124,10 +125,17 @@ export function onAdminAuthChange(callback: (admin: AdminAccount | null) => void
     }
   };
 
+  const unsubAuth = onAuthStateChanged(auth, (user) => {
+    if (user && (user.uid === MASTER_ADMIN_UID || user.email === 'contact@derote.in')) {
+      callback(getCurrentAdmin());
+    }
+  });
+
   window.addEventListener(ADMIN_AUTH_STATE_EVENT, handler);
   window.addEventListener('storage', storageHandler);
 
   return () => {
+    unsubAuth();
     window.removeEventListener(ADMIN_AUTH_STATE_EVENT, handler);
     window.removeEventListener('storage', storageHandler);
   };
@@ -139,10 +147,23 @@ export function onAdminAuthChange(callback: (admin: AdminAccount | null) => void
 export function getCurrentAdmin(): AdminAccount | null {
   try {
     const raw = localStorage.getItem(ADMIN_SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (raw) return JSON.parse(raw);
   } catch {
-    return null;
+    // continue
   }
+  if (auth.currentUser) {
+    if (auth.currentUser.uid === MASTER_ADMIN_UID || auth.currentUser.email === 'contact@derote.in') {
+      return {
+        id: auth.currentUser.uid,
+        fullName: auth.currentUser.displayName || 'DeRote Central Administrator',
+        roleTitle: 'Master Administrator',
+        institution: 'DeRote Central Administration',
+        email: auth.currentUser.email || 'admin@derote.in',
+        avatarText: 'AD',
+      };
+    }
+  }
+  return null;
 }
 
 /**

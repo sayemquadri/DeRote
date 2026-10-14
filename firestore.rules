@@ -30,6 +30,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
+        request.auth.uid == 'HRmNP5WPw5fXtihxIVB2nkcCTkz1' ||
         request.auth.token.email == 'contact@derote.in' ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
@@ -121,6 +122,12 @@ service cloud.firestore {
     // Administrators Collection
     match /admins/{adminId} {
       allow read, write: if isValidId(adminId) && isAdmin();
+    }
+
+    // Global Files & Export Documents Collection
+    match /files/{fileId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
     }
   }
 }

@@ -76,8 +76,12 @@ export default function App() {
     };
   }, []);
 
-  // Determine if active user is an authorized administrator
+  // Determine if active user is an authorized administrator (Master Admin or Institutional Admin)
   const isSuperAdmin =
+    firebaseUserUid === 'HRmNP5WPw5fXtihxIVB2nkcCTkz1' ||
+    auth.currentUser?.uid === 'HRmNP5WPw5fXtihxIVB2nkcCTkz1' ||
+    currentAdmin?.id === 'HRmNP5WPw5fXtihxIVB2nkcCTkz1' ||
+    activeStudent?.id === 'HRmNP5WPw5fXtihxIVB2nkcCTkz1' ||
     currentAdmin?.email === 'contact@derote.in' ||
     auth.currentUser?.email === 'contact@derote.in';
 
