@@ -2,8 +2,8 @@ import React from 'react';
 import { ArrowRight, Compass } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
-// Hero Illustration: One principal student illustration communicating reflection & curiosity
-import heroIllustration from '../assets/images/hero_student_thoughtful_1791984220624.jpg';
+// Hero Illustration: One principal student illustration from the approved reference
+import heroIllustration from '../assets/images/approved_hero_illustration.png';
 
 // Six Student Concern Card Illustrations
 import cardFamilyExpectations from '../assets/images/1.png';
@@ -23,7 +23,6 @@ interface StudentConcern {
   description: string;
   image: string;
   alt: string;
-  tag: string;
 }
 
 const STUDENT_CONCERNS: StudentConcern[] = [
@@ -33,7 +32,6 @@ const STUDENT_CONCERNS: StudentConcern[] = [
     description: "I don't want to disappoint my parents.",
     image: cardFamilyExpectations,
     alt: 'Student experiencing pressure from family expectations',
-    tag: 'Expectations',
   },
   {
     id: 'career-confusion',
@@ -41,7 +39,6 @@ const STUDENT_CONCERNS: StudentConcern[] = [
     description: "Everyone asks what I want to become. I'm not sure yet.",
     image: cardCareerConfusion,
     alt: 'Student unsure about career direction',
-    tag: 'Direction',
   },
   {
     id: 'lost-motivation',
@@ -49,7 +46,6 @@ const STUDENT_CONCERNS: StudentConcern[] = [
     description: "I'm studying because I have to, not because I know what I want.",
     image: cardLostMotivation,
     alt: 'Student searching for personal meaning and motivation in studies',
-    tag: 'Motivation',
   },
   {
     id: 'finding-strengths',
@@ -57,7 +53,6 @@ const STUDENT_CONCERNS: StudentConcern[] = [
     description: "I know my marks, but not always what I'm good at.",
     image: cardFindingStrengths,
     alt: 'Student exploring innate strengths and interests beyond marks',
-    tag: 'Strengths',
   },
   {
     id: 'feeling-behind',
@@ -65,7 +60,6 @@ const STUDENT_CONCERNS: StudentConcern[] = [
     description: "Everyone seems ahead. I'm still figuring things out.",
     image: cardFeelingBehind,
     alt: 'Student realizing growth is a personal journey, not a race',
-    tag: 'Pacing',
   },
   {
     id: 'my-voice-choices',
@@ -73,7 +67,6 @@ const STUDENT_CONCERNS: StudentConcern[] = [
     description: 'I wish people would ask what matters to me.',
     image: cardMyVoiceChoices,
     alt: 'Student voicing authentic interests and personal agency',
-    tag: 'Agency',
   },
 ];
 
@@ -83,38 +76,55 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* =========================================================================
           SECTION A: HERO
           Purpose: Introduce DeRote's central idea & establish an emotional connection.
-          - Exact typography with "going on" highlighted in DeRote Blue (#0866C6)
-          - ONE principal student illustration on the right communicating quiet curiosity & reflection
+          - Airy daylight sunlit room atmosphere with subtle pale-blue depth
+          - Headline on left with "going on" highlighted in DeRote Blue (#0866C6)
+          - ONE principal student illustration on the right
           - Prominent primary CTA button & simple secondary text link
+          - Organic wave transition into the next section
           ========================================================================= */}
-      <section className="relative w-full bg-[#F7FAFD] border-b border-[#E8F3FF] overflow-hidden">
-        {/* Soft pale-blue atmospheric ambient washes */}
+      <section className="relative w-full bg-gradient-to-b from-[#EBF3FB] via-[#F3F8FD] to-[#FFFFFF] overflow-hidden">
+        {/* Soft atmospheric ambient daylight washes */}
         <div
-          className="absolute -top-24 -left-16 w-[480px] h-[480px] bg-[#E8F3FF] rounded-full blur-3xl opacity-60 pointer-events-none"
+          className="absolute -top-32 -left-20 w-[550px] h-[550px] bg-gradient-to-br from-[#D9EAFB]/70 to-[#EBF3FB]/30 rounded-full blur-3xl pointer-events-none"
           aria-hidden="true"
         />
         <div
-          className="absolute top-1/4 -right-20 w-[540px] h-[540px] bg-[#EBF4FE] rounded-full blur-3xl opacity-70 pointer-events-none"
-          aria-hidden="true"
-        />
-        <div
-          className="absolute -bottom-20 left-1/3 w-[360px] h-[360px] bg-[#F0F6FF] rounded-full blur-2xl opacity-50 pointer-events-none"
+          className="absolute top-10 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-[#E2EFFC]/80 via-[#EDF5FE]/40 to-transparent rounded-full blur-3xl pointer-events-none"
           aria-hidden="true"
         />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20 xl:py-24">
+        {/* Subtle indoor botanical silhouette accent on far left edge */}
+        <div
+          className="absolute -left-12 bottom-12 w-48 h-72 opacity-20 pointer-events-none hidden md:block"
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 100 200" fill="none" className="w-full h-full text-[#0866C6]">
+            <path
+              d="M10,190 Q30,120 15,60 Q35,80 50,40 Q40,90 70,80 Q55,120 75,140 Q40,150 10,190 Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 sm:pt-14 lg:pt-18 pb-6 sm:pb-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             {/* LEFT COLUMN: Editorial Typography & Actions */}
             <div className="lg:col-span-5 xl:col-span-5 text-left flex flex-col items-start z-10">
-              {/* Main Headline */}
-              <h1 className="text-4xl sm:text-5xl lg:text-[54px] xl:text-[58px] font-extrabold tracking-tight text-[#062B50] leading-[1.12] mb-5 sm:mb-6">
+              {/* Playful Blue Accent Mark above headline */}
+              <div className="flex items-center gap-1.5 mb-3.5 text-[#0866C6]" aria-hidden="true">
+                <span className="w-1.5 h-4.5 bg-[#0866C6] rounded-full -rotate-25" />
+                <span className="w-1.5 h-2.5 bg-[#0866C6] rounded-full -rotate-25" />
+              </div>
+
+              {/* Main Headline with exact deliberate breaks and blue highlight */}
+              <h1 className="text-4xl sm:text-5xl lg:text-[54px] xl:text-[58px] font-extrabold tracking-tight text-[#062B50] leading-[1.09] mb-5 sm:mb-6">
                 There's more <br />
                 <span className="text-[#0866C6]">going on</span> <br />
                 than just school.
               </h1>
 
               {/* Supporting Text */}
-              <p className="text-base sm:text-lg lg:text-xl text-[#5A6E85] leading-relaxed mb-8 max-w-xl font-normal">
+              <p className="text-base sm:text-lg lg:text-[19px] text-[#5A6E85] leading-relaxed mb-8 max-w-md font-normal">
                 Your future. Your expectations. Your interests. <br className="hidden sm:inline" />
                 It can be a lot to figure out.
               </p>
@@ -124,7 +134,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => onNavigate('/signup')}
-                  className="w-full sm:w-auto min-h-[52px] sm:min-h-[56px] px-8 py-4 rounded-2xl bg-[#0866C6] hover:bg-[#062B50] text-white font-bold text-base sm:text-lg transition-all duration-150 flex items-center justify-center gap-2.5 shadow-lg shadow-[#0866C6]/25 hover:shadow-xl hover:shadow-[#0866C6]/30 active:scale-[0.98] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0866C6]"
+                  className="w-full sm:w-auto min-h-[52px] sm:min-h-[56px] px-8 py-3.5 sm:py-4 rounded-2xl bg-[#0866C6] hover:bg-[#062B50] text-white font-bold text-base sm:text-lg transition-all duration-150 flex items-center justify-center gap-2.5 shadow-lg shadow-[#0866C6]/25 hover:shadow-xl hover:shadow-[#0866C6]/30 active:scale-[0.98] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#0866C6]"
                 >
                   <span>Explore what's on your mind</span>
                   <ArrowRight className="w-5 h-5 shrink-0" aria-hidden="true" />
@@ -146,90 +156,108 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             {/* RIGHT COLUMN: Single Principal Student Illustration */}
             <div className="lg:col-span-7 xl:col-span-7 flex items-center justify-center lg:justify-end">
               <div className="relative w-full max-w-lg sm:max-w-xl lg:max-w-none">
-                {/* Subtle soft backdrop accent glow */}
-                <div
-                  className="absolute -inset-4 bg-gradient-to-tr from-[#D5E9FF]/40 via-[#E8F3FF]/60 to-transparent rounded-full -z-10 blur-2xl opacity-70"
-                  aria-hidden="true"
+                <img
+                  src={heroIllustration}
+                  alt="A thoughtful student sitting in reflection at her desk with books and laptop, thinking about her future"
+                  className="w-full h-auto object-contain select-none transition-transform duration-300"
+                  loading="eager"
+                  referrerPolicy="no-referrer"
                 />
-
-                {/* Integrated Editorial Artwork */}
-                <div className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-md shadow-[#062B50]/5 bg-transparent transition-all">
-                  <img
-                    src={heroIllustration}
-                    alt="A thoughtful student sitting in gentle reflection with a journal, looking upward with curiosity about their future"
-                    className="w-full h-auto object-contain select-none"
-                    loading="eager"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Organic Wave Transition into Section B */}
+        <div className="w-full overflow-hidden leading-none z-10 -mb-[1px]">
+          <svg
+            viewBox="0 0 1440 90"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-10 sm:h-14 lg:h-18 block text-white"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M0,35 C280,80 500,10 740,45 C980,80 1220,15 1440,45 L1440,90 L0,90 Z"
+              fill="#FFFFFF"
+            />
+          </svg>
         </div>
       </section>
 
       {/* =========================================================================
           SECTION B: STUDENT CONCERN CARDS
           Purpose: Help students recognise specific situations & concerns they relate to.
-          - Heading: "Ever feel like nobody gets it?"
-          - Short supporting sentence
+          - Heading: "Ever feel like nobody gets it?" with blue accent ticks
+          - Short supporting sentence: "Sometimes, it's difficult to explain what's going on in your head."
           - SIX INDIVIDUAL CARDS in a 3-column, 2-row grid on desktop
+          - Each card has its own illustration, title, description, and circular arrow button
           ========================================================================= */}
-      <section className="px-4 sm:px-6 lg:px-8 py-16 sm:py-24 bg-white border-b border-[#E8F3FF]">
+      <section className="px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-16 sm:pb-24 bg-white border-b border-[#E8F3FF]">
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
-          <div className="mb-12 sm:mb-16 text-center max-w-2xl mx-auto">
-            <span className="text-[11px] sm:text-xs font-bold tracking-widest uppercase text-[#0866C6] mb-2.5 block">
-              Student Perspectives
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#062B50] tracking-tight mb-3.5">
-              Ever feel like nobody gets it?
-            </h2>
+          <div className="mb-10 sm:mb-14 text-center max-w-2xl mx-auto">
+            <div className="inline-flex items-center justify-center gap-2 mb-2.5">
+              <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-[#062B50] tracking-tight">
+                Ever feel like nobody gets it?
+              </h2>
+              {/* Playful blue accent marks right after question mark */}
+              <span className="inline-flex items-center gap-1 text-[#0866C6] -mt-2.5" aria-hidden="true">
+                <span className="w-1.5 h-3.5 bg-[#0866C6] rounded-full rotate-[25deg]" />
+                <span className="w-1.5 h-2 bg-[#0866C6] rounded-full rotate-[25deg]" />
+              </span>
+            </div>
             <p className="text-base sm:text-lg text-[#5A6E85] leading-relaxed font-normal">
-              You're not the only one navigating these questions. Here's what we hear most often from students figuring out what's next.
+              Sometimes, it's difficult to explain what's going on in your head.
             </p>
           </div>
 
           {/* Six Independent Concern Cards Grid (3 Columns x 2 Rows on Desktop) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7 lg:gap-8">
             {STUDENT_CONCERNS.map((concern) => (
               <div
                 key={concern.id}
-                className="bg-[#F8FAFD] rounded-3xl p-6 sm:p-7 border border-[#E8F3FF] shadow-xs hover:shadow-lg hover:border-[#0866C6]/30 transition-all duration-200 flex flex-col justify-between group"
+                onClick={() => onNavigate('/questionnaire')}
+                className="bg-white rounded-3xl p-5 sm:p-6 border border-[#E2EDF8] shadow-xs hover:shadow-lg hover:border-[#0866C6]/30 transition-all duration-200 flex flex-col justify-between group cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onNavigate('/questionnaire');
+                  }
+                }}
               >
                 <div>
-                  {/* Card Illustration */}
-                  <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-white mb-5 border border-[#E8F3FF] shadow-inner">
+                  {/* Card Illustration Banner */}
+                  <div className="w-full h-36 sm:h-40 lg:h-44 rounded-2xl overflow-hidden bg-[#F0F6FD] mb-4 sm:mb-5 border border-[#EAF2FC]">
                     <img
                       src={concern.image}
                       alt={concern.alt}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />
                   </div>
 
-                  {/* Heading */}
-                  <h3 className="text-xl font-bold text-[#062B50] mb-2 tracking-tight group-hover:text-[#0866C6] transition-colors">
-                    {concern.heading}
-                  </h3>
+                  {/* Heading & Description on Left, Circular Action Arrow on Right */}
+                  <div className="flex items-center justify-between gap-3 pt-1">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg sm:text-[19px] font-bold text-[#062B50] tracking-tight mb-1 group-hover:text-[#0866C6] transition-colors truncate">
+                        {concern.heading}
+                      </h3>
+                      <p className="text-xs sm:text-[13.5px] text-[#5A6E85] leading-snug font-normal line-clamp-2">
+                        {concern.description}
+                      </p>
+                    </div>
 
-                  {/* Description */}
-                  <p className="text-sm sm:text-[15px] text-[#5A6E85] leading-relaxed font-normal">
-                    "{concern.description}"
-                  </p>
-                </div>
-
-                <div className="mt-5 pt-4 border-t border-[#E8F3FF] flex items-center justify-between text-xs font-medium text-[#64778C]">
-                  <span className="text-[#0866C6] font-semibold">{concern.tag}</span>
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('/questionnaire')}
-                    className="inline-flex items-center gap-1 text-[#0866C6] hover:text-[#062B50] font-bold group-hover:translate-x-0.5 transition-transform cursor-pointer"
-                  >
-                    <span>Reflect</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                    <div
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#EBF4FE] text-[#0866C6] group-hover:bg-[#0866C6] group-hover:text-white transition-all flex items-center justify-center shrink-0 shadow-xs group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    >
+                      <ArrowRight className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
@@ -283,3 +311,4 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     </div>
   );
 };
+
