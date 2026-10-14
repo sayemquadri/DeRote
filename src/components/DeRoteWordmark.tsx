@@ -1,4 +1,5 @@
 import React from 'react';
+import deroteLogo from '../assets/images/derote_logo_fitted.png';
 
 interface DeRoteWordmarkProps {
   showDescriptor?: boolean;
@@ -18,41 +19,24 @@ export const DeRoteWordmark: React.FC<DeRoteWordmarkProps> = ({
   };
 
   const iconSizes = {
-    sm: 'w-6 h-6 text-xs',
-    md: 'w-8 h-8 text-sm',
-    lg: 'w-9 h-9 text-base',
+    sm: 'w-7 h-7',
+    md: 'w-9 h-9 sm:w-10 sm:h-10',
+    lg: 'w-11 h-11',
   };
 
   return (
     <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
-      {/* Distinctive architectural logo mark with layered blue arches */}
+      {/* DeRote Logo Image replacing old SVG */}
       <span
-        className={`${iconSizes[size]} rounded-xl bg-gradient-to-br from-[#0866C6] to-[#062B50] p-[1.5px] shadow-sm shrink-0 flex items-center justify-center`}
+        className={`${iconSizes[size]} rounded-xl overflow-hidden shadow-xs shrink-0 flex items-center justify-center bg-white border border-[#D5E4F3]`}
         aria-hidden="true"
       >
-        <span className="w-full h-full rounded-[10px] bg-white flex items-center justify-center">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            className="w-4 h-4 text-[#0866C6]"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Elegant overlapping architectural curve paths */}
-            <path
-              d="M4 19C4 11.268 10.268 5 18 5"
-              stroke="#0866C6"
-              strokeWidth="3"
-              strokeLinecap="round"
-            />
-            <path
-              d="M7 19C7 13.477 11.477 9 17 9"
-              stroke="#168FE5"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <circle cx="17.5" cy="18" r="2" fill="#062B50" />
-          </svg>
-        </span>
+        <img
+          src={deroteLogo}
+          alt="DeRote logo"
+          className="w-full h-full object-cover object-center select-none"
+          loading="eager"
+        />
       </span>
 
       <div className="flex items-baseline gap-2">
